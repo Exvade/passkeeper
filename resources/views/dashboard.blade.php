@@ -409,8 +409,10 @@
 
         // --- 1. LOGIK FAVORITE (AJAX) ---
         async function toggleFavorite(id, btnElement) {
-            const icon = btnElement.querySelector('i');
-            // Optimistic UI Update (Ubah dulu biar cepat rasanya)
+            // [PERBAIKAN] Cari <svg> dulu (karena sudah direplace feather), baru cari <i>
+            const icon = btnElement.querySelector('svg') || btnElement.querySelector('i');
+
+            // Optimistic UI Update
             const isActive = icon.classList.contains('star-active');
             if (isActive) {
                 icon.classList.remove('star-active');
@@ -436,9 +438,15 @@
                     throw new Error();
                 }
             } catch (e) {
-                // Kalau gagal, balikin lagi warnanya
+                // Kalau gagal, balikin lagi warnanya (Rollback)
+                if (isActive) {
+                    icon.classList.add('star-active');
+                    icon.classList.remove('star-inactive');
+                } else {
+                    icon.classList.remove('star-active');
+                    icon.classList.add('star-inactive');
+                }
                 showToast('Gagal update favorite.');
-                // Revert UI logic here if needed
             }
         }
 
