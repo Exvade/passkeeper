@@ -44,23 +44,34 @@
                     </div>
                     <span class="font-bold text-xl tracking-tight text-slate-800">PassKeeper</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-slate-500 hidden sm:block">Hai,
-                        {{ Auth::user()->name }}</span>
-                    <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    {{-- Nama User (Hidden di HP) --}}
+                    <span class="text-sm font-medium text-slate-500 hidden md:block">
+                        Hai, {{ Auth::user()->name }}
+                    </span>
 
+                    {{-- Divider --}}
+                    <div class="h-6 w-px bg-slate-200 hidden md:block"></div>
+
+                    {{-- Tombol Settings (Ada Teksnya Sekarang) --}}
                     <button onclick="openSettingsModal()"
-                        class="text-slate-500 hover:text-indigo-600 transition p-2 hover:bg-indigo-50 rounded-full"
-                        title="Pengaturan">
-                        <i data-feather="settings" class="w-5 h-5"></i>
+                        class="flex items-center gap-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition group"
+                        title="Pengaturan Akun">
+                        {{-- Icon berputar dikit pas di-hover biar interaktif --}}
+                        <i data-feather="settings"
+                            class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"></i>
+                        <span class="text-sm font-semibold hidden sm:block">Settings</span>
                     </button>
 
+                    {{-- Tombol Logout (Ada Teksnya Juga Biar Seragam) --}}
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit"
-                            class="text-slate-500 hover:text-red-600 transition p-2 hover:bg-red-50 rounded-full"
-                            title="Logout">
-                            <i data-feather="log-out" class="w-5 h-5"></i>
+                            class="flex items-center gap-2 text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition group"
+                            title="Keluar Aplikasi">
+                            <i data-feather="log-out"
+                                class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+                            <span class="text-sm font-semibold hidden sm:block">Logout</span>
                         </button>
                     </form>
                 </div>
@@ -91,11 +102,15 @@
                 </form>
 
                 <div class="flex gap-2">
+                    {{-- Tombol Export (Updated UX) --}}
                     <a href="{{ route('passwords.export') }}" target="_blank"
-                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-2.5 rounded-xl font-medium transition flex items-center justify-center shadow-sm"
-                        title="Backup CSV">
-                        <i data-feather="download" class="w-5 h-5"></i>
+                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
+                        title="Download Backup">
+                        <i data-feather="download" class="w-4 h-4 text-slate-500"></i>
+                        <span>Export CSV</span>
                     </a>
+
+                    {{-- Tombol Tambah --}}
                     <button onclick="openAddModal()"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 whitespace-nowrap">
                         <i data-feather="plus" class="w-5 h-5"></i>
@@ -332,7 +347,7 @@
                 iconBg.classList.remove('bg-emerald-100', 'text-emerald-600');
                 iconBg.classList.add('bg-red-100', 'text-red-600');
                 icon.innerHTML =
-                '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                    '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
                 icon.setAttribute('data-feather', 'alert-circle');
             } else {
                 title.innerText = "Berhasil";
