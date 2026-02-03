@@ -69,6 +69,12 @@
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari aplikasi..."
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition">
                 </form>
+
+                <a href="{{ route('passwords.export') }}" target="_blank"
+                    class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2.5 rounded-xl font-medium transition flex items-center justify-center gap-2"
+                    title="Backup Data">
+                    <i data-feather="download" class="w-5 h-5"></i>
+                </a>
                 <button onclick="openAddModal()"
                     class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-medium transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
                     <i data-feather="plus" class="w-5 h-5"></i> Baru
@@ -147,8 +153,17 @@
 
                         {{-- Username & Password --}}
                         <div class="mb-4 space-y-2">
-                            <p class="text-xs text-slate-500 font-medium">Username: <span
-                                    class="text-slate-300">{{ $pass->username }}</span></p>
+                            {{-- [BARU] Username dengan Tombol Copy --}}
+                            <div
+                                class="flex justify-between items-center text-xs font-medium bg-slate-900/50 p-2 rounded-lg border border-transparent hover:border-slate-700 transition">
+                                <span class="text-slate-500">User: <span
+                                        class="text-slate-300 select-all">{{ $pass->username }}</span></span>
+                                <button onclick="copyText('{{ $pass->username }}')"
+                                    class="text-slate-500 hover:text-indigo-400" title="Copy Username">
+                                    <i data-feather="copy" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+
                             <div
                                 class="bg-black/30 rounded-xl p-3 flex justify-between items-center border border-white/5">
                                 <input type="text" id="pass-{{ $pass->id }}" value="••••••••••••" readonly
@@ -398,6 +413,11 @@
             } catch (e) {
                 showToast('Gagal decrypt!');
             }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            showToast('Teks berhasil disalin!');
         }
 
         function copyToClipboard(id) {

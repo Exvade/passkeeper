@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PasswordController extends Controller
 {
@@ -90,5 +91,49 @@ public function toggleFavorite($id) {
     public function destroy($id) {
         Password::where('user_id', auth()->id())->findOrFail($id)->delete();
         return back()->with('success', 'Data dihapus.');
+    }
+
+    public function export()
+    {
+        $fileName = 'passkeeper-backup-' . date('Y-m-d_H-i') . '.csv';
+        
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function() {
+            $file = fopen('php://output', 'w');
+            
+            // [TRICK 1] Tambahkan BOM (Byte Order Mark) agar Excel baca UTF-8 dengan benar
+            // Ini bikin simbol-simbol aneh jadi bener tampilannya
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // [TRICK 2] Gunakan delimiter ";" (titik koma) bukan "," (koma)
+            // Parameter ke-3 di fputcsv adalah separator
+            $delimiter = ';'; 
+
+            // Header Kolom
+            fputcsv($file, ['Kategori', 'Aplikasi', 'URL', 'Username', 'Password'], $delimiter);
+
+            // Ambil data user
+            $passwords = Password::where('user_id', auth()->id())->get();
+
+            foreach ($passwords as $row) {
+                fputcsv($file, [
+                    $row->category,
+                    $row->site_name,
+                    $row->username,
+                    Crypt::decryptString($row->encrypted_password)
+                ], $delimiter); // Jangan lupa delimiter di sini juga
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

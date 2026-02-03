@@ -23,4 +23,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/passwords/{id}/decrypt', [PasswordController::class, 'decrypt'])->name('passwords.decrypt');
     Route::delete('/passwords/{id}', [PasswordController::class, 'destroy'])->name('passwords.destroy');
     Route::patch('/passwords/{id}/favorite', [PasswordController::class, 'toggleFavorite'])->name('passwords.favorite');
+
+    Route::get('/export', [PasswordController::class, 'export'])->name('passwords.export');
 });
