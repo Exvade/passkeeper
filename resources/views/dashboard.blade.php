@@ -4,52 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- WAJIB UTK AJAX --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard - PassKeeper</title>
     @vite('resources/css/app.css')
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        /* Animasi Bintang */
         .star-active {
             fill: #fbbf24;
             color: #fbbf24;
         }
 
-        /* Kuning Emas */
         .star-inactive {
             fill: none;
-            color: #64748b;
+            color: #cbd5e1;
         }
 
-        /* Abu-abu */
+        /* Slate-300 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 
-<body class="bg-slate-950 text-slate-200 font-sans antialiased min-h-screen relative">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen relative">
 
     {{-- Navbar --}}
-    <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
+    <nav
+        class="bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 supports-[backdrop-filter]:bg-white/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-2">
-                    <div class="bg-indigo-600 p-1.5 rounded-lg">
-                        <i data-feather="shield" class="text-white w-5 h-5"></i>
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-indigo-200 shadow-lg">
+                        <i data-feather="shield" class="w-5 h-5"></i>
                     </div>
-                    <span class="font-bold text-xl tracking-tight text-white">PassKeeper</span>
+                    <span class="font-bold text-xl tracking-tight text-slate-800">PassKeeper</span>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-slate-400 hidden sm:block">Halo, {{ Auth::user()->name }}</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-slate-500 hidden sm:block">Hai,
+                        {{ Auth::user()->name }}</span>
+                    <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
                     <button onclick="openSettingsModal()"
-                        class="text-slate-400 hover:text-white transition p-2 hover:bg-slate-800 rounded-lg"
-                        title="Pengaturan Akun">
+                        class="text-slate-500 hover:text-indigo-600 transition p-2 hover:bg-indigo-50 rounded-full"
+                        title="Pengaturan">
                         <i data-feather="settings" class="w-5 h-5"></i>
                     </button>
 
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit"
-                            class="text-sm text-red-400 hover:text-red-300 font-medium transition flex items-center gap-1">
-                            <i data-feather="log-out" class="w-4 h-4"></i> Logout
+                            class="text-slate-500 hover:text-red-600 transition p-2 hover:bg-red-50 rounded-full"
+                            title="Logout">
+                            <i data-feather="log-out" class="w-5 h-5"></i>
                         </button>
                     </form>
                 </div>
@@ -60,168 +71,80 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {{-- Header & Search --}}
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-5">
             <div>
-                <h1 class="text-2xl font-bold text-white">Brankas Kamu</h1>
-                <p class="text-slate-400 text-sm mt-1">Total {{ $passwords->count() }} akun tersimpan aman.</p>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Brankas Password</h1>
+                <p class="text-slate-500 text-sm mt-1">Total <span
+                        class="font-bold text-indigo-600">{{ $passwords->count() }}</span> akun tersimpan aman.</p>
             </div>
+
             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                 <form action="{{ route('dashboard') }}" method="GET" class="relative w-full md:w-64">
-                    {{-- Simpan filter kategori saat searching --}}
                     @if (request('category'))
                         <input type="hidden" name="category" value="{{ request('category') }}">
                     @endif
-                    <i data-feather="search" class="absolute left-3 top-3 w-4 h-4 text-slate-500"></i>
+                    <i data-feather="search" class="absolute left-3.5 top-3 w-4 h-4 text-slate-400"></i>
                     <input type="text" id="searchInput" name="search" value="{{ request('search') }}"
                         placeholder="Cari aplikasi..."
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition"
+                        class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition shadow-sm"
                         onkeyup="debouncedSearch()">
                 </form>
 
-                <a href="{{ route('passwords.export') }}" target="_blank"
-                    class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2.5 rounded-xl font-medium transition flex items-center justify-center gap-2"
-                    title="Backup Data">
-                    <i data-feather="download" class="w-5 h-5"></i>
-                </a>
-                <button onclick="openAddModal()"
-                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-medium transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
-                    <i data-feather="plus" class="w-5 h-5"></i> Baru
-                </button>
+                <div class="flex gap-2">
+                    <a href="{{ route('passwords.export') }}" target="_blank"
+                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-2.5 rounded-xl font-medium transition flex items-center justify-center shadow-sm"
+                        title="Backup CSV">
+                        <i data-feather="download" class="w-5 h-5"></i>
+                    </a>
+                    <button onclick="openAddModal()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i data-feather="plus" class="w-5 h-5"></i>
+                        <span>Tambah</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        {{-- [BARU] Category Tabs --}}
-        <div class="flex gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar">
+        {{-- Tabs --}}
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-6 no-scrollbar">
             @php $categories = ['Semua', 'Sosmed', 'Pekerjaan', 'Keuangan', 'Hiburan', 'Lainnya']; @endphp
             @foreach ($categories as $cat)
                 <a href="{{ route('dashboard', ['category' => $cat, 'search' => request('search')]) }}"
-                    class="px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap border 
+                    class="px-5 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap border 
                    {{ request('category') == $cat || (!request('category') && $cat == 'Semua')
-                       ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/25'
-                       : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200' }}">
+                       ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                       : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800 hover:shadow-sm' }}">
                     {{ $cat }}
                 </a>
             @endforeach
         </div>
 
         <div id="password-container">
-            @include('partials.password-list') {{-- Panggil partial view saat load awal --}}
+            @include('partials.password-list')
         </div>
     </main>
 
-    {{-- MODAL SETTINGS (Linked Accounts) --}}
-    <div id="settingsModalOverlay" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-slate-900 border border-slate-700 w-full max-w-md p-6 rounded-2xl shadow-2xl relative">
-
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i data-feather="user" class="w-5 h-5 text-indigo-400"></i> Akun Terhubung
-                    </h2>
-                    <button onclick="closeSettingsModal()" class="text-slate-500 hover:text-white"><i data-feather="x"
-                            class="w-6 h-6"></i></button>
-                </div>
-
-                {{-- List Akun Google --}}
-                <div class="space-y-3 mb-6">
-                    @foreach (Auth::user()->socialAccounts as $acc)
-                        <div
-                            class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
-                            <div class="flex items-center gap-3">
-                                {{-- Logo Google Kecil --}}
-                                <div class="bg-white p-1 rounded-full w-6 h-6 flex items-center justify-center">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-                                        alt="G" class="w-full">
-                                </div>
-                                <div>
-                                    <p class="text-sm text-white font-medium">{{ $acc->email }}</p>
-                                    <p class="text-[10px] text-slate-500">Ditambahkan
-                                        {{ $acc->created_at->diffForHumans() }}</p>
-                                </div>
-                            </div>
-
-                            {{-- Tombol Unlink (Hanya muncul jika akun > 1) --}}
-                            @if (Auth::user()->socialAccounts->count() > 1)
-                                <button
-                                    onclick="openUnlinkModal('{{ route('social-accounts.destroy', $acc->id) }}', '{{ $acc->email }}')"
-                                    class="text-slate-600 hover:text-red-400 p-2 transition" title="Putuskan Sambungan">
-                                    <i data-feather="trash" class="w-4 h-4"></i>
-                                </button>
-                            @else
-                                <span class="text-[10px] text-slate-600 italic px-2">Utama</span>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-
-                {{-- Tombol Tambah Akun --}}
-                <a href="{{ route('auth.google') }}"
-                    class="flex items-center justify-center gap-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium py-3 rounded-xl transition">
-                    <i data-feather="plus-circle" class="w-4 h-4"></i> Hubungkan Google Lain
-                </a>
-            </div>
-        </div>
-    </div>
-
-    {{-- MODAL KONFIRMASI UNLINK (PIN REQUIRED) --}}
-    <div id="unlinkModalOverlay" class="fixed inset-0 z-[60] hidden"> {{-- Z-Index lebih tinggi dari settings --}}
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeUnlinkModal()"></div>
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div
-                class="bg-slate-900 border border-red-500/30 w-full max-w-sm p-6 rounded-2xl shadow-2xl relative text-center">
-
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/10 mb-4">
-                    <i data-feather="alert-triangle" class="h-6 w-6 text-red-500"></i>
-                </div>
-
-                <h3 class="text-lg font-bold text-white">Putuskan Akun?</h3>
-                <p class="text-sm text-slate-400 mt-2">
-                    Kamu akan menghapus akses login untuk <br> <span id="unlinkEmail"
-                        class="text-white font-bold">email@ini.com</span>.
-                </p>
-
-                <form id="unlinkForm" method="POST" class="mt-6">
-                    @csrf @method('DELETE')
-
-                    <div class="mb-4 text-left">
-                        <label class="text-xs text-slate-500 uppercase font-bold">Konfirmasi PIN Master</label>
-                        <input type="password" name="pin" maxlength="6" required placeholder="••••••"
-                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white text-center tracking-widest mt-1 focus:ring-red-500 focus:border-red-500">
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeUnlinkModal()"
-                            class="w-full bg-slate-800 text-slate-300 py-2.5 rounded-xl">Batal</button>
-                        <button type="submit"
-                            class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl">Hapus</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     {{-- MODAL TAMBAH/EDIT --}}
     <div id="modalOverlay" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-slate-900 border border-slate-700 w-full max-w-md p-6 rounded-2xl shadow-2xl relative">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        <div class="flex items-center justify-center min-h-screen px-4 py-8">
+            <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl relative transform transition-all">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 id="modalTitle" class="text-xl font-bold text-white">Simpan Password</h2>
-                    <button onclick="closeModal()" class="text-slate-500 hover:text-white"><i data-feather="x"
-                            class="w-6 h-6"></i></button>
+                    <h2 id="modalTitle" class="text-xl font-bold text-slate-800">Simpan Password</h2>
+                    <button onclick="closeModal()"
+                        class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition"><i
+                            data-feather="x" class="w-5 h-5"></i></button>
                 </div>
 
-                <form id="modalForm" action="{{ route('passwords.store') }}" method="POST" class="space-y-4">
+                <form id="modalForm" action="{{ route('passwords.store') }}" method="POST" class="space-y-5">
                     @csrf
                     <div id="methodInput"></div>
 
-                    {{-- [BARU] Input Kategori --}}
                     <div>
                         <label
-                            class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Kategori</label>
+                            class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Kategori</label>
                         <select id="inputCategory" name="category"
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition appearance-none">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition appearance-none font-medium">
                             <option value="Sosmed">Sosmed</option>
                             <option value="Pekerjaan">Pekerjaan</option>
                             <option value="Keuangan">Keuangan</option>
@@ -233,77 +156,154 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label
-                                class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Aplikasi</label>
+                                class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Aplikasi</label>
                             <input type="text" id="inputSiteName" name="site_name" placeholder="Netflix"
-                                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium"
                                 required>
                         </div>
                         <div>
                             <label
-                                class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Username</label>
+                                class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Username</label>
                             <input type="text" id="inputUsername" name="username" placeholder="User123"
-                                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium"
                                 required>
                         </div>
                     </div>
 
                     <div>
                         <label
-                            class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">URL</label>
+                            class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">URL</label>
                         <input type="url" id="inputUrl" name="site_url" placeholder="https://"
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
                     </div>
 
                     <div>
                         <label
-                            class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Password</label>
+                            class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Password</label>
                         <input type="text" id="inputPassword" name="password" placeholder="Rahasia..."
-                            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none">
-                        <p id="editNote" class="hidden text-xs text-slate-500 mt-1 italic">*Kosongkan jika password
-                            tidak berubah.</p>
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                        <p id="editNote" class="hidden text-xs text-slate-400 mt-2 flex items-center gap-1"><i
+                                data-feather="info" class="w-3 h-3"></i> Kosongkan jika password tidak berubah.</p>
                     </div>
 
                     <div class="pt-2">
                         <button type="submit" id="submitBtn"
-                            class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-indigo-500/25">Simpan</button>
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-600/20 active:scale-[0.98]">Simpan
+                            Data</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    {{-- MODAL DELETE (Copy Paste yang lama, atau gunakan kode sebelumnya) --}}
-    <div id="deleteModalOverlay" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
+    {{-- MODAL SETTINGS --}}
+    <div id="settingsModalOverlay" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
         <div class="flex items-center justify-center min-h-screen px-4">
-            <div
-                class="bg-slate-900 border border-slate-700 w-full max-w-sm p-6 rounded-2xl shadow-2xl relative text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/10 mb-4">
-                    <i data-feather="alert-triangle" class="h-6 w-6 text-red-500"></i>
+            <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl relative">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Akun Terhubung</h2>
+                    <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600"><i
+                            data-feather="x" class="w-6 h-6"></i></button>
                 </div>
-                <h3 class="text-lg font-bold text-white">Hapus Password?</h3>
-                <p class="text-sm text-slate-400 mt-2">Data ini akan hilang selamanya.</p>
+                <div class="space-y-3 mb-6">
+                    @foreach (Auth::user()->socialAccounts as $acc)
+                        <div
+                            class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-white shadow-sm p-1.5 rounded-full border border-slate-100">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+                                        alt="G" class="w-5 h-5">
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-800 font-semibold">{{ $acc->email }}</p>
+                                    <p class="text-xs text-slate-500">{{ $acc->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                            @if (Auth::user()->socialAccounts->count() > 1)
+                                <button
+                                    onclick="openUnlinkModal('{{ route('social-accounts.destroy', $acc->id) }}', '{{ $acc->email }}')"
+                                    class="text-slate-400 hover:text-red-600 p-2 transition bg-white border border-slate-200 rounded-lg hover:border-red-200 hover:bg-red-50"
+                                    title="Putuskan">
+                                    <i data-feather="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            @else
+                                <span
+                                    class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">UTAMA</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                <a href="{{ route('auth.google') }}"
+                    class="flex items-center justify-center gap-2 w-full bg-white text-slate-700 border border-slate-300 font-semibold py-3 rounded-xl transition hover:bg-slate-50">
+                    <i data-feather="plus-circle" class="w-4 h-4"></i> Hubungkan Google Lain
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL DELETE & UNLINK (STYLE UPDATE) --}}
+    <div id="deleteModalOverlay" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
+                <div
+                    class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
+                    <i data-feather="alert-triangle" class="h-6 w-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Hapus Permanen?</h3>
+                <p class="text-sm text-slate-500 mt-2 px-4">Tindakan ini tidak bisa dibatalkan. Data akan hilang.</p>
                 <form id="deleteForm" method="POST" class="mt-6 flex gap-3">
                     @csrf @method('DELETE')
                     <button type="button" onclick="closeDeleteModal()"
-                        class="w-full bg-slate-800 text-slate-300 py-2.5 rounded-xl">Batal</button>
+                        class="w-full bg-white border border-slate-300 text-slate-700 font-semibold py-2.5 rounded-xl hover:bg-slate-50">Batal</button>
                     <button type="submit"
-                        class="w-full bg-red-600 text-white font-bold py-2.5 rounded-xl">Hapus</button>
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-red-500/30">Hapus</button>
                 </form>
             </div>
         </div>
     </div>
 
-    {{-- TOAST (Sama seperti sebelumnya) --}}
+    <div id="unlinkModalOverlay" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeUnlinkModal()"></div>
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
+                <div
+                    class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
+                    <i data-feather="shield-off" class="h-6 w-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Putuskan Akun?</h3>
+                <p class="text-sm text-slate-500 mt-2">Akses login untuk <br><span id="unlinkEmail"
+                        class="text-slate-800 font-bold bg-slate-100 px-1 rounded">email</span> akan dihapus.</p>
+                <form id="unlinkForm" method="POST" class="mt-6">
+                    @csrf @method('DELETE')
+                    <div class="mb-4 text-left">
+                        <label class="text-xs text-slate-500 uppercase font-bold tracking-wider ml-1">Konfirmasi
+                            PIN</label>
+                        <input type="password" name="pin" maxlength="6" required placeholder="••••••"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-slate-800 text-center tracking-[0.5em] text-lg font-bold mt-1 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeUnlinkModal()"
+                            class="w-full bg-white border border-slate-300 text-slate-700 font-semibold py-2.5 rounded-xl">Batal</button>
+                        <button type="submit"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-red-500/30">Putuskan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- TOAST (Light Mode) --}}
     <div id="toast"
-        class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-24 opacity-0">
+        class="fixed bottom-6 right-6 z-50 transform transition-all duration-300 translate-y-24 opacity-0">
         <div
-            class="bg-slate-800 border border-slate-700 text-white px-5 py-4 rounded-xl shadow-2xl flex items-center gap-3">
-            <div class="bg-emerald-500/20 p-2 rounded-full text-emerald-400"><i data-feather="check"
+            class="bg-white border border-slate-100 text-slate-800 px-5 py-4 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] flex items-center gap-4">
+            <div class="bg-emerald-100 p-2 rounded-full text-emerald-600"><i data-feather="check"
                     class="w-4 h-4"></i></div>
             <div>
-                <h4 class="font-bold text-sm">Berhasil</h4>
-                <p id="toast-message" class="text-xs text-slate-400 mt-0.5">Notif.</p>
+                <h4 class="font-bold text-sm text-slate-900">Berhasil</h4>
+                <p id="toast-message" class="text-xs text-slate-500 mt-0.5">Notifikasi.</p>
             </div>
         </div>
     </div>

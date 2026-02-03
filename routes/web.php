@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PinController;
+use App\Http\Controllers\SocialAccountController;
 
 
 // Halaman Depan (Login)
