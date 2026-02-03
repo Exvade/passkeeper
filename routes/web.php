@@ -19,6 +19,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [PasswordController::class, 'index'])->name('dashboard');
     Route::post('/passwords', [PasswordController::class, 'store'])->name('passwords.store');
+    Route::put('/passwords/{id}', [PasswordController::class, 'update'])->name('passwords.update');
     Route::get('/passwords/{id}/decrypt', [PasswordController::class, 'decrypt'])->name('passwords.decrypt');
     Route::delete('/passwords/{id}', [PasswordController::class, 'destroy'])->name('passwords.destroy');
 });

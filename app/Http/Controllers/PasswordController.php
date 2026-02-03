@@ -52,6 +52,32 @@ class PasswordController extends Controller
             'raw_password' => Crypt::decryptString($password->encrypted_password)
         ]);
     }
+    public function update(Request $request, $id)
+    {
+        $password = Password::where('user_id', auth()->id())->findOrFail($id);
+
+        $request->validate([
+            'site_name' => 'required',
+            'username' => 'required',
+        ]);
+
+        // Siapkan data yang mau diupdate
+        $data = [
+            'site_name' => $request->site_name,
+            'username' => $request->username,
+            'site_url' => $request->site_url,
+        ];
+
+        // Cek: Apakah user mengisi password baru?
+        if ($request->filled('password')) {
+            // Kalau diisi, kita enkripsi password barunya
+            $data['encrypted_password'] = Crypt::encryptString($request->password);
+        }
+
+        $password->update($data);
+
+        return back()->with('success', 'Data berhasil diperbarui!');
+    }
 
     public function destroy($id) {
         Password::where('user_id', auth()->id())->findOrFail($id)->delete();
