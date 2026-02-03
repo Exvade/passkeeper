@@ -39,6 +39,12 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-slate-400 hidden sm:block">Halo, {{ Auth::user()->name }}</span>
+                    <button onclick="openSettingsModal()"
+                        class="text-slate-400 hover:text-white transition p-2 hover:bg-slate-800 rounded-lg"
+                        title="Pengaturan Akun">
+                        <i data-feather="settings" class="w-5 h-5"></i>
+                    </button>
+
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit"
@@ -198,6 +204,99 @@
         @endif
     </main>
 
+    {{-- MODAL SETTINGS (Linked Accounts) --}}
+    <div id="settingsModalOverlay" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-slate-900 border border-slate-700 w-full max-w-md p-6 rounded-2xl shadow-2xl relative">
+
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i data-feather="user" class="w-5 h-5 text-indigo-400"></i> Akun Terhubung
+                    </h2>
+                    <button onclick="closeSettingsModal()" class="text-slate-500 hover:text-white"><i
+                            data-feather="x" class="w-6 h-6"></i></button>
+                </div>
+
+                {{-- List Akun Google --}}
+                <div class="space-y-3 mb-6">
+                    @foreach (Auth::user()->socialAccounts as $acc)
+                        <div
+                            class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <div class="flex items-center gap-3">
+                                {{-- Logo Google Kecil --}}
+                                <div class="bg-white p-1 rounded-full w-6 h-6 flex items-center justify-center">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+                                        alt="G" class="w-full">
+                                </div>
+                                <div>
+                                    <p class="text-sm text-white font-medium">{{ $acc->email }}</p>
+                                    <p class="text-[10px] text-slate-500">Ditambahkan
+                                        {{ $acc->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+
+                            {{-- Tombol Unlink (Hanya muncul jika akun > 1) --}}
+                            @if (Auth::user()->socialAccounts->count() > 1)
+                                <button
+                                    onclick="openUnlinkModal('{{ route('social-accounts.destroy', $acc->id) }}', '{{ $acc->email }}')"
+                                    class="text-slate-600 hover:text-red-400 p-2 transition"
+                                    title="Putuskan Sambungan">
+                                    <i data-feather="trash" class="w-4 h-4"></i>
+                                </button>
+                            @else
+                                <span class="text-[10px] text-slate-600 italic px-2">Utama</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Tombol Tambah Akun --}}
+                <a href="{{ route('auth.google') }}"
+                    class="flex items-center justify-center gap-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium py-3 rounded-xl transition">
+                    <i data-feather="plus-circle" class="w-4 h-4"></i> Hubungkan Google Lain
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL KONFIRMASI UNLINK (PIN REQUIRED) --}}
+    <div id="unlinkModalOverlay" class="fixed inset-0 z-[60] hidden"> {{-- Z-Index lebih tinggi dari settings --}}
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeUnlinkModal()"></div>
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div
+                class="bg-slate-900 border border-red-500/30 w-full max-w-sm p-6 rounded-2xl shadow-2xl relative text-center">
+
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/10 mb-4">
+                    <i data-feather="alert-triangle" class="h-6 w-6 text-red-500"></i>
+                </div>
+
+                <h3 class="text-lg font-bold text-white">Putuskan Akun?</h3>
+                <p class="text-sm text-slate-400 mt-2">
+                    Kamu akan menghapus akses login untuk <br> <span id="unlinkEmail"
+                        class="text-white font-bold">email@ini.com</span>.
+                </p>
+
+                <form id="unlinkForm" method="POST" class="mt-6">
+                    @csrf @method('DELETE')
+
+                    <div class="mb-4 text-left">
+                        <label class="text-xs text-slate-500 uppercase font-bold">Konfirmasi PIN Master</label>
+                        <input type="password" name="pin" maxlength="6" required placeholder="••••••"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white text-center tracking-widest mt-1 focus:ring-red-500 focus:border-red-500">
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeUnlinkModal()"
+                            class="w-full bg-slate-800 text-slate-300 py-2.5 rounded-xl">Batal</button>
+                        <button type="submit"
+                            class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- MODAL TAMBAH/EDIT --}}
     <div id="modalOverlay" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
@@ -350,6 +449,34 @@
         const methodInput = document.getElementById('methodInput');
         const editNote = document.getElementById('editNote');
         const btn = document.getElementById('submitBtn');
+
+        // --- SETTINGS MODAL ---
+        const settingsModal = document.getElementById('settingsModalOverlay');
+
+        function openSettingsModal() {
+            settingsModal.classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            settingsModal.classList.add('hidden');
+        }
+
+        // --- UNLINK MODAL ---
+        const unlinkModal = document.getElementById('unlinkModalOverlay');
+        const unlinkForm = document.getElementById('unlinkForm');
+        const unlinkEmailSpan = document.getElementById('unlinkEmail');
+
+        function openUnlinkModal(url, email) {
+            settingsModal.classList.add('hidden'); // Tutup settings dulu biar ga numpuk
+            unlinkModal.classList.remove('hidden');
+            unlinkForm.action = url;
+            unlinkEmailSpan.innerText = email;
+        }
+
+        function closeUnlinkModal() {
+            unlinkModal.classList.add('hidden');
+            settingsModal.classList.remove('hidden'); // Buka settings lagi
+        }
 
         function openAddModal() {
             modal.classList.remove('hidden');

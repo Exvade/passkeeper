@@ -11,9 +11,11 @@ Route::get('/', function () {
     return view('login');
 })->name('login');
 
-// Route Google
-Route::get('/auth/google', [AuthController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [AuthController::class, 'callback'])->name('google.callback');
+// Route untuk melempar user ke Google
+Route::get('/auth/google/redirect', [AuthController::class, 'redirect'])->name('auth.google'); 
+
+// Route callback (biarkan saja, pastikan ada)
+Route::get('/auth/google/callback', [AuthController::class, 'callback']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Dashboard (Protected)
@@ -38,6 +40,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/passwords/{id}/decrypt', [PasswordController::class, 'decrypt'])->name('passwords.decrypt');
         Route::patch('/passwords/{id}/favorite', [PasswordController::class, 'toggleFavorite'])->name('passwords.favorite');
         Route::get('/export', [PasswordController::class, 'export'])->name('passwords.export');
+
+        Route::delete('/social-accounts/{id}', [SocialAccountController::class, 'destroy'])->name('social-accounts.destroy');
 
         // Route Link Akun (Nanti kita buat)
         // Route::post('/link-account', ...);

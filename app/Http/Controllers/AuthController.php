@@ -9,51 +9,68 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthController extends Controller
 {
     public function redirect() {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account']) // <--- INI KUNCINYA
+            ->redirect();
     }
 
     public function callback() {
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            // 1. Cek apakah Akun Google ini sudah ada di tabel social_accounts?
-            $account = \App\Models\SocialAccount::where('provider_id', $googleUser->getId())
-                                              ->where('provider_name', 'google')
-                                              ->first();
+            // --- SKENARIO 1: USER SUDAH LOGIN (Mau Nambah Akun) ---
+            if (Auth::check()) {
+                $currentUser = Auth::user();
 
-            if ($account) {
-                // KASUS A: Akun sudah terhubung -> Login User pemiliknya
-                Auth::login($account->user);
-            } else {
-                // KASUS B: Akun belum terhubung.
+                // Cek: Apakah google id ini sudah dipakai orang lain?
+                $existingAccount = \App\Models\SocialAccount::where('provider_id', $googleUser->getId())->first();
                 
-                // Cek apakah emailnya sudah ada di tabel users? (Mungkin login manual atau linked)
-                $user = \App\Models\User::where('email', $googleUser->getEmail())->first();
-
-                if (!$user) {
-                    // Kalau user juga belum ada -> Buat User Baru
-                    $user = \App\Models\User::create([
-                        'email' => $googleUser->getEmail(),
-                        'name' => $googleUser->getName(),
-                        // Password null karena login via google
-                    ]);
+                if ($existingAccount) {
+                    // Kalau ternyata ini akun dia sendiri, ya sudah biarkan
+                    if ($existingAccount->user_id == $currentUser->id) {
+                        return redirect()->route('dashboard')->with('success', 'Akun ini sudah terhubung kok.');
+                    }
+                    // Kalau punya orang lain, tolak!
+                    return redirect()->route('dashboard')->with('error', 'Gagal! Akun Google ini sudah dipakai user lain.');
                 }
 
-                // Link-kan akun google ini ke user tersebut
-                $user->socialAccounts()->create([
+                // Link-kan akun baru ini ke user yang sedang login
+                $currentUser->socialAccounts()->create([
                     'provider_id' => $googleUser->getId(),
                     'provider_name' => 'google',
                     'email' => $googleUser->getEmail(),
                 ]);
 
+                return redirect()->route('dashboard')->with('success', 'Akun Google baru berhasil ditambahkan!');
+            }
+
+            // --- SKENARIO 2: USER BELUM LOGIN (Login Biasa) ---
+            // (Kode lama kamu paste di sini, tidak berubah)
+            $account = \App\Models\SocialAccount::where('provider_id', $googleUser->getId())->first();
+
+            if ($account) {
+                Auth::login($account->user);
+            } else {
+                $user = \App\Models\User::where('email', $googleUser->getEmail())->first();
+                if (!$user) {
+                    $user = \App\Models\User::create([
+                        'email' => $googleUser->getEmail(),
+                        'name' => $googleUser->getName(),
+                        // Password null
+                    ]);
+                }
+                $user->socialAccounts()->create([
+                    'provider_id' => $googleUser->getId(),
+                    'provider_name' => 'google',
+                    'email' => $googleUser->getEmail(),
+                ]);
                 Auth::login($user);
             }
 
-            // Redirect (Nanti akan dicegat Middleware PIN)
             return redirect()->route('dashboard');
             
         } catch (\Exception $e) {
-            return redirect()->route('login')->with('error', 'Login gagal: ' . $e->getMessage());
+            return redirect()->route('login')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
