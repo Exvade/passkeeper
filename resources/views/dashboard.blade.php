@@ -119,6 +119,7 @@
             @endforeach
         </div>
 
+        {{-- Password List Container --}}
         <div id="password-container">
             @include('partials.password-list')
         </div>
@@ -242,7 +243,7 @@
         </div>
     </div>
 
-    {{-- MODAL DELETE & UNLINK (STYLE UPDATE) --}}
+    {{-- MODAL DELETE --}}
     <div id="deleteModalOverlay" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
         <div class="flex items-center justify-center min-h-screen px-4">
@@ -264,6 +265,7 @@
         </div>
     </div>
 
+    {{-- MODAL UNLINK --}}
     <div id="unlinkModalOverlay" class="fixed inset-0 z-[60] hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeUnlinkModal()"></div>
         <div class="flex items-center justify-center min-h-screen px-4">
@@ -294,15 +296,18 @@
         </div>
     </div>
 
-    {{-- TOAST (Light Mode) --}}
+    {{-- TOAST DYNAMIC (Success/Error) --}}
     <div id="toast"
         class="fixed bottom-6 right-6 z-50 transform transition-all duration-300 translate-y-24 opacity-0">
         <div
             class="bg-white border border-slate-100 text-slate-800 px-5 py-4 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] flex items-center gap-4">
-            <div class="bg-emerald-100 p-2 rounded-full text-emerald-600"><i data-feather="check"
-                    class="w-4 h-4"></i></div>
+            {{-- Icon Container --}}
+            <div id="toast-icon-bg" class="bg-emerald-100 p-2 rounded-full text-emerald-600">
+                <i id="toast-icon" data-feather="check" class="w-4 h-4"></i>
+            </div>
             <div>
-                <h4 class="font-bold text-sm text-slate-900">Berhasil</h4>
+                {{-- Title & Message Dinamis --}}
+                <h4 id="toast-title" class="font-bold text-sm text-slate-900">Berhasil</h4>
                 <p id="toast-message" class="text-xs text-slate-500 mt-0.5">Notifikasi.</p>
             </div>
         </div>
@@ -311,13 +316,65 @@
     <script>
         feather.replace();
 
-        // --- 1. LOGIK FAVORITE (AJAX) ---
-        async function toggleFavorite(id, btnElement) {
-            // [PERBAIKAN] Cari <svg> dulu (karena sudah direplace feather), baru cari <i>
-            const icon = btnElement.querySelector('svg') || btnElement.querySelector('i');
+        // --- TOAST SYSTEM ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const title = document.getElementById('toast-title');
+            const msg = document.getElementById('toast-message');
+            const iconBg = document.getElementById('toast-icon-bg');
+            const icon = document.getElementById('toast-icon');
 
-            // Optimistic UI Update
+            msg.innerText = message;
+
+            if (type === 'error') {
+                title.innerText = "Gagal";
+                title.classList.add('text-red-600');
+                iconBg.classList.remove('bg-emerald-100', 'text-emerald-600');
+                iconBg.classList.add('bg-red-100', 'text-red-600');
+                icon.innerHTML =
+                '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                icon.setAttribute('data-feather', 'alert-circle');
+            } else {
+                title.innerText = "Berhasil";
+                title.classList.remove('text-red-600');
+                iconBg.classList.remove('bg-red-100', 'text-red-600');
+                iconBg.classList.add('bg-emerald-100', 'text-emerald-600');
+                icon.setAttribute('data-feather', 'check');
+            }
+            feather.replace();
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        // --- DECRYPT PASSWORD ---
+        async function revealPassword(id) {
+            const inputField = document.getElementById(`pass-${id}`);
+            if (inputField.type === 'text' && inputField.value !== '••••••••••••') {
+                inputField.value = '••••••••••••';
+                return;
+            }
+            try {
+                inputField.value = 'Loading...';
+                const res = await fetch(`/passwords/${id}/decrypt`);
+                if (!res.ok) throw new Error("Gagal mengambil data");
+                const data = await res.json();
+                inputField.value = data.raw_password;
+                setTimeout(() => {
+                    inputField.value = '••••••••••••';
+                }, 10000);
+            } catch (e) {
+                inputField.value = '••••••••••••';
+                showToast('Gagal decrypt! Coba refresh halaman.', 'error');
+            }
+        }
+
+        // --- FAVORITE LOGIC ---
+        async function toggleFavorite(id, btnElement) {
+            const icon = btnElement.querySelector('svg') || btnElement.querySelector('i');
             const isActive = icon.classList.contains('star-active');
+
             if (isActive) {
                 icon.classList.remove('star-active');
                 icon.classList.add('star-inactive');
@@ -327,7 +384,6 @@
             }
 
             try {
-                // Kirim Request ke Server
                 const response = await fetch(`/passwords/${id}/favorite`, {
                     method: 'PATCH',
                     headers: {
@@ -335,14 +391,12 @@
                         'Content-Type': 'application/json'
                     }
                 });
-
                 if (response.ok) {
-                    showToast(isActive ? 'Dihapus dari Favorite' : 'Ditambahkan ke Favorite!');
+                    showToast(isActive ? 'Dihapus dari Favorite' : 'Ditambahkan ke Favorite!', 'success');
                 } else {
                     throw new Error();
                 }
             } catch (e) {
-                // Kalau gagal, balikin lagi warnanya (Rollback)
                 if (isActive) {
                     icon.classList.add('star-active');
                     icon.classList.remove('star-inactive');
@@ -350,95 +404,71 @@
                     icon.classList.remove('star-active');
                     icon.classList.add('star-inactive');
                 }
-                showToast('Gagal update favorite.');
+                showToast('Gagal koneksi ke server.', 'error');
             }
-        }
-
-        // --- 2. LOGIK MODAL ADD/EDIT ---
-        const modal = document.getElementById('modalOverlay');
-        const form = document.getElementById('modalForm');
-        const title = document.getElementById('modalTitle');
-        const methodInput = document.getElementById('methodInput');
-        const editNote = document.getElementById('editNote');
-        const btn = document.getElementById('submitBtn');
-
-        // --- SETTINGS MODAL ---
-        const settingsModal = document.getElementById('settingsModalOverlay');
-
-        function openSettingsModal() {
-            settingsModal.classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            settingsModal.classList.add('hidden');
         }
 
         // --- REALTIME SEARCH (DEBOUNCE) ---
         let debounceTimer;
 
         function debouncedSearch() {
-            // 1. Ambil nilai input
             const query = document.getElementById('searchInput').value;
-
-            // Ambil juga kategori yang sedang aktif (opsional, biar filter gak ilang)
             const urlParams = new URLSearchParams(window.location.search);
             const category = urlParams.get('category') || 'Semua';
-
-            // 2. Clear timer sebelumnya (Reset waktu tunggu)
             clearTimeout(debounceTimer);
-
-            // 3. Set timer baru (Tunggu 500ms sebelum kirim request)
             debounceTimer = setTimeout(() => {
                 fetchPasswords(query, category);
-            }, 500); // 500ms = setengah detik delay
+            }, 500);
         }
-
         async function fetchPasswords(search, category) {
             const container = document.getElementById('password-container');
-
-            // Efek loading tipis (opsional: ubah opacity)
             container.style.opacity = '0.5';
-
             try {
-                // Kirim request ke server via AJAX
                 const response = await fetch(`/dashboard?search=${search}&category=${category}`, {
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest' // Tandai sebagai AJAX
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-
                 const html = await response.text();
-
-                // Ganti isi container dengan HTML baru dari server
                 container.innerHTML = html;
-
-                // PENTING: Render ulang ikon karena konten baru masuk
                 feather.replace();
-
             } catch (error) {
                 console.error('Gagal mencari:', error);
             } finally {
-                // Balikin opacity
                 container.style.opacity = '1';
             }
         }
 
-        // --- UNLINK MODAL ---
+        // --- COPY UTILS ---
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            showToast('Username berhasil disalin!', 'success');
+        }
+
+        function copyToClipboard(id) {
+            const el = document.getElementById(id);
+            if (el.value === '••••••••••••' || el.value === 'Loading...') {
+                showToast('Buka password dulu baru copy!', 'error');
+                return;
+            }
+            el.select();
+            navigator.clipboard.writeText(el.value);
+            showToast('Password disalin ke clipboard!', 'success');
+        }
+
+        // --- MODAL CONTROLS ---
+        const modal = document.getElementById('modalOverlay');
+        const form = document.getElementById('modalForm');
+        const title = document.getElementById('modalTitle');
+        const methodInput = document.getElementById('methodInput');
+        const editNote = document.getElementById('editNote');
+        const btn = document.getElementById('submitBtn');
+        const settingsModal = document.getElementById('settingsModalOverlay');
         const unlinkModal = document.getElementById('unlinkModalOverlay');
         const unlinkForm = document.getElementById('unlinkForm');
         const unlinkEmailSpan = document.getElementById('unlinkEmail');
-
-        function openUnlinkModal(url, email) {
-            settingsModal.classList.add('hidden'); // Tutup settings dulu biar ga numpuk
-            unlinkModal.classList.remove('hidden');
-            unlinkForm.action = url;
-            unlinkEmailSpan.innerText = email;
-        }
-
-        function closeUnlinkModal() {
-            unlinkModal.classList.add('hidden');
-            settingsModal.classList.remove('hidden'); // Buka settings lagi
-        }
+        const delModal = document.getElementById('deleteModalOverlay');
+        const delForm = document.getElementById('deleteForm');
 
         function openAddModal() {
             modal.classList.remove('hidden');
@@ -451,7 +481,7 @@
             document.getElementById('inputUsername').value = '';
             document.getElementById('inputUrl').value = '';
             document.getElementById('inputPassword').value = '';
-            document.getElementById('inputCategory').value = 'Lainnya'; // Default category
+            document.getElementById('inputCategory').value = 'Lainnya';
             document.getElementById('inputPassword').required = true;
         }
 
@@ -465,7 +495,7 @@
             document.getElementById('inputSiteName').value = data.site_name;
             document.getElementById('inputUsername').value = data.username;
             document.getElementById('inputUrl').value = data.site_url;
-            document.getElementById('inputCategory').value = data.category; // Set category lama
+            document.getElementById('inputCategory').value = data.category;
             document.getElementById('inputPassword').value = '';
             document.getElementById('inputPassword').required = false;
         }
@@ -474,55 +504,25 @@
             modal.classList.add('hidden');
         }
 
-        // --- 3. TOAST & UTILS ---
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = message;
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 3000);
+        function openSettingsModal() {
+            settingsModal.classList.remove('hidden');
         }
 
-        // Decrypt & Copy (Sama seperti sebelumnya)
-        async function revealPassword(id) {
-            const inputField = document.getElementById(`pass-${id}`);
-            if (inputField.type === 'text' && inputField.value !== '••••••••••••') {
-                inputField.value = '••••••••••••';
-                return;
-            }
-            try {
-                inputField.value = 'Loading...';
-                const res = await fetch(`/passwords/${id}/decrypt`);
-                const data = await res.json();
-                inputField.value = data.raw_password;
-                setTimeout(() => {
-                    inputField.value = '••••••••••••';
-                }, 10000);
-            } catch (e) {
-                showToast('Gagal decrypt!');
-            }
+        function closeSettingsModal() {
+            settingsModal.classList.add('hidden');
         }
 
-        function copyText(text) {
-            navigator.clipboard.writeText(text);
-            showToast('Teks berhasil disalin!');
+        function openUnlinkModal(url, email) {
+            settingsModal.classList.add('hidden');
+            unlinkModal.classList.remove('hidden');
+            unlinkForm.action = url;
+            unlinkEmailSpan.innerText = email;
         }
 
-        function copyToClipboard(id) {
-            const el = document.getElementById(id);
-            if (el.value === '••••••••••••' || el.value === 'Loading...') {
-                showToast('Buka password dulu!');
-                return;
-            }
-            el.select();
-            navigator.clipboard.writeText(el.value);
-            showToast('Password disalin!');
+        function closeUnlinkModal() {
+            unlinkModal.classList.add('hidden');
+            settingsModal.classList.remove('hidden');
         }
-
-        // Delete Modal Logic
-        const delModal = document.getElementById('deleteModalOverlay');
-        const delForm = document.getElementById('deleteForm');
 
         function openDeleteModal(url) {
             delForm.action = url;
