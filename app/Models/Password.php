@@ -16,6 +16,8 @@ class Password extends Model
         'username',
         'site_url',
         'encrypted_password',
+        'category',
+        'is_favorite',
     ];
 
     // Relasi: Password ini milik siapa?

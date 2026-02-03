@@ -22,4 +22,5 @@ Route::middleware('auth')->group(function () {
     Route::put('/passwords/{id}', [PasswordController::class, 'update'])->name('passwords.update');
     Route::get('/passwords/{id}/decrypt', [PasswordController::class, 'decrypt'])->name('passwords.decrypt');
     Route::delete('/passwords/{id}', [PasswordController::class, 'destroy'])->name('passwords.destroy');
+    Route::patch('/passwords/{id}/favorite', [PasswordController::class, 'toggleFavorite'])->name('passwords.favorite');
 });
