@@ -9,31 +9,37 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PasswordController extends Controller
 {
-    // Method INDEX (Update untuk Filter & Sortir Favorite)
-public function index(Request $request) {
-    $query = Password::where('user_id', auth()->id());
+    public function index(Request $request) {
+        $query = Password::where('user_id', auth()->id());
 
-    // 1. Filter Pencarian
-    if ($request->has('search') && $request->search != '') {
-        $search = $request->search;
-        $query->where(function($q) use ($search) {
-            $q->where('site_name', 'like', "%{$search}%")
-              ->orWhere('username', 'like', "%{$search}%");
-        });
+        // 1. Filter Pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('site_name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Filter Kategori
+        if ($request->has('category') && $request->category != 'Semua') {
+            $query->where('category', $request->category);
+        }
+
+        // 3. Sorting
+        $passwords = $query->orderBy('is_favorite', 'desc')
+                           ->latest()
+                           ->get();
+        
+        // [LOGIC BARU] Jika request datang dari AJAX (Realtime Search)
+        if ($request->ajax()) {
+            // Kita cuma kembalikan potongan HTML (Partial View)
+            return view('partials.password-list', compact('passwords'))->render();
+        }
+
+        // Kalau akses biasa, return halaman full dashboard
+        return view('dashboard', compact('passwords'));
     }
-
-    // 2. Filter Kategori (BARU)
-    if ($request->has('category') && $request->category != 'Semua') {
-        $query->where('category', $request->category);
-    }
-
-    // 3. Sorting: Favorite duluan, baru tanggal terbaru (BARU)
-    $passwords = $query->orderBy('is_favorite', 'desc')
-                       ->latest()
-                       ->get();
-
-    return view('dashboard', compact('passwords'));
-}
 
 // Method STORE (Tambah validasi category)
 public function store(Request $request) {
