@@ -37,7 +37,7 @@
         class="bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 supports-[backdrop-filter]:bg-white/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1">
                     {{-- LOGO FIX: Added inline style to prevent giant logo --}}
                     <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="object-contain rounded-lg"
                         style="width: 36px; height: 36px;">
@@ -246,7 +246,8 @@
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="alert-triangle" class="h-6 w-6"></i></div>
+                    <i data-feather="alert-triangle" class="h-6 w-6"></i>
+                </div>
                 <h3 class="text-lg font-bold text-slate-800">Hapus Permanen?</h3>
                 <p class="text-sm text-slate-500 mt-2 px-4">Tindakan ini tidak bisa dibatalkan.</p>
                 <form id="deleteForm" method="POST" class="mt-6 flex gap-3">
@@ -267,7 +268,8 @@
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="shield-off" class="h-6 w-6"></i></div>
+                    <i data-feather="shield-off" class="h-6 w-6"></i>
+                </div>
                 <h3 class="text-lg font-bold text-slate-800">Putuskan Akun?</h3>
                 <p class="text-sm text-slate-500 mt-2">Akses login untuk <span id="unlinkEmail"
                         class="text-slate-800 font-bold">email</span> akan dihapus.</p>
@@ -338,7 +340,7 @@
             }, 3000);
         }
 
-        // --- NEW: REVEAL THEN COPY LOGIC ---
+        // --- NEW: REVEAL THEN COPY LOGIC WITH AUTO-HIDE ---
         async function handlePasswordAction(id, btn) {
             const input = document.getElementById(`pass-input-${id}`);
             const currentState = btn.getAttribute('data-state');
@@ -346,7 +348,7 @@
             // STATE 1: BUKA PASSWORD
             if (currentState === 'hidden') {
                 try {
-                    btn.classList.add('animate-pulse'); // Feedback Loading
+                    btn.classList.add('animate-pulse');
 
                     const res = await fetch(`/passwords/${id}/decrypt`);
                     if (!res.ok) throw new Error("Gagal mengambil data");
@@ -374,12 +376,30 @@
                     btn.classList.remove('animate-pulse');
                 }
             }
-            // STATE 2: COPY PASSWORD
+            // STATE 2: COPY PASSWORD & AUTO HIDE
             else {
                 input.select();
                 input.setSelectionRange(0, 99999);
                 navigator.clipboard.writeText(input.value).then(() => {
                     showToast('Password berhasil disalin!', 'success');
+
+                    // --- AUTO HIDE LOGIC (2 Detik) ---
+                    setTimeout(() => {
+                        // 1. Sembunyikan Password
+                        input.type = 'password';
+                        input.value = 'DUMMYPASS123'; // Reset value dummy
+                        input.classList.remove('text-slate-800', 'font-bold', 'tracking-normal');
+                        input.classList.add('text-slate-600', 'tracking-widest');
+
+                        // 2. Kembalikan Tombol ke Mata
+                        btn.setAttribute('data-state', 'hidden');
+                        btn.title = "Lihat Password";
+                        btn.classList.remove('text-indigo-600', 'bg-indigo-50', 'border-indigo-100');
+                        btn.classList.add('text-slate-400', 'hover:text-indigo-600');
+                        btn.innerHTML = `<i data-feather="eye" class="w-4 h-4"></i>`;
+                        feather.replace();
+                    }, 2000);
+
                 });
             }
         }
