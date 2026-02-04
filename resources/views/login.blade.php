@@ -15,24 +15,22 @@
 
 <body class="bg-slate-50 h-screen flex flex-col items-center justify-center font-sans antialiased text-slate-600">
 
-    <div class="w-full max-w-md px-6">
+    <div class="w-full max-w-sm px-6">
 
         {{-- CARD LOGIN --}}
         <div class="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100">
 
-            {{-- HEADER: Logo + Nama (Kiri-Kanan) --}}
-            <div class="flex items-center gap-4 mb-8">
-                <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="w-12 h-12 rounded-lg shadow-sm">
-                <div>
-                    <h1 class="font-bold text-2xl text-slate-900 tracking-tight leading-none">PassKeeper</h1>
-                    <p class="text-xs text-slate-400 font-medium mt-0.5">Your Digital Vault</p>
-                </div>
+            {{-- HEADER: Logo + Nama (Satu Kesatuan) --}}
+            {{-- Hapus shadow, border, dan rounded pada gambar agar clean --}}
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <img src="{{ asset('square-logo.png') }}" alt="Logo" class="w-10 h-10 object-contain">
+                <h1 class="font-bold text-2xl text-slate-900 tracking-tight">PassKeeper</h1>
             </div>
 
             {{-- TEXT INTRO --}}
-            <div class="mb-8">
-                <h2 class="text-lg font-semibold text-slate-900">Masuk ke Akun</h2>
-                <p class="text-sm text-slate-500 mt-1">Lanjutkan untuk mengakses brankas password Anda.</p>
+            <div class="mb-8 text-center">
+                <h2 class="text-lg font-semibold text-slate-900">Selamat Datang</h2>
+                <p class="text-sm text-slate-500 mt-1">Akses brankas password digital Anda.</p>
             </div>
 
             {{-- TOMBOL GOOGLE --}}
@@ -51,53 +49,40 @@
                 Masuk dengan Google
             </a>
 
-            {{-- EXTRA CONTENT (FITUR) --}}
-            {{-- Ini yang bikin gak sepi tapi tetep rapi --}}
-            <div class="pt-6 border-t border-slate-100 grid grid-rows-3 gap-2 text-center">
-                <div>
-                    <div
-                        class="bg-emerald-50 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-emerald-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            {{-- EXTRA CONTENT (ROWS / FLEX-COL) --}}
+            {{-- Menggunakan layout baris ke bawah (stack) agar lebih rapi --}}
+            <div class="pt-6 border-t border-slate-100 flex flex-col gap-3">
+
+                <div class="flex items-center gap-3 text-slate-600">
+                    <div class="text-emerald-500 bg-emerald-50 p-1.5 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                             stroke-linejoin="round">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                         </svg>
                     </div>
-                    <p class="text-[10px] font-semibold text-slate-600 uppercase">Enkripsi</p>
+                    <span class="text-xs font-medium">Terenkripsi AES-256 (Aman)</span>
                 </div>
-                <div>
-                    <div
-                        class="bg-blue-50 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+
+                <div class="flex items-center gap-3 text-slate-600">
+                    <div class="text-indigo-500 bg-indigo-50 p-1.5 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                             stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
                     </div>
-                    <p class="text-[10px] font-semibold text-slate-600 uppercase">Backup</p>
+                    <span class="text-xs font-medium">Backup & Export CSV Kapan Saja</span>
                 </div>
-                <div>
-                    <div
-                        class="bg-indigo-50 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-indigo-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                    </div>
-                    <p class="text-[10px] font-semibold text-slate-600 uppercase">Gratis</p>
-                </div>
+
             </div>
 
         </div>
 
-        {{-- COPYRIGHT SIMPLE --}}
+        {{-- COPYRIGHT --}}
         <p class="text-center text-xs text-slate-400 mt-8">
             &copy; {{ date('Y') }} PassKeeper Security.
         </p>
