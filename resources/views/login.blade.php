@@ -23,7 +23,7 @@
             {{-- HEADER: Logo + Nama (Satu Kesatuan) --}}
             {{-- Hapus shadow, border, dan rounded pada gambar agar clean --}}
             <div class="flex items-center justify-center gap-3 mb-8">
-                <img src="{{ asset('square-logo.png') }}" alt="Logo" class="w-10 h-10 object-contain">
+                <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="w-10 h-10 object-contain">
                 <h1 class="font-bold text-2xl text-slate-900 tracking-tight">PassKeeper</h1>
             </div>
 
