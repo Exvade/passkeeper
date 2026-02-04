@@ -22,7 +22,7 @@
 
             {{-- HEADER: Logo + Nama (Kiri-Kanan) --}}
             <div class="flex items-center gap-4 mb-8">
-                <img src="{{ asset('square-logo.png') }}" alt="Logo" class="w-12 h-12 rounded-lg shadow-sm">
+                <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="w-12 h-12 rounded-lg shadow-sm">
                 <div>
                     <h1 class="font-bold text-2xl text-slate-900 tracking-tight leading-none">PassKeeper</h1>
                     <p class="text-xs text-slate-400 font-medium mt-0.5">Your Digital Vault</p>
@@ -53,7 +53,7 @@
 
             {{-- EXTRA CONTENT (FITUR) --}}
             {{-- Ini yang bikin gak sepi tapi tetep rapi --}}
-            <div class="pt-6 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
+            <div class="pt-6 border-t border-slate-100 grid grid-rows-3 gap-2 text-center">
                 <div>
                     <div
                         class="bg-emerald-50 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-emerald-600">
