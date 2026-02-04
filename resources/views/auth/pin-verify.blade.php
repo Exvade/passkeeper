@@ -4,59 +4,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keamanan - PassKeeper</title>
+    <title>Verifikasi - PassKeeper</title>
     @vite('resources/css/app.css')
-    <script src="https://unpkg.com/feather-icons"></script>
+
+    {{-- FONT LOAD --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
 </head>
 
-<body class="bg-slate-50 h-screen flex items-center justify-center font-sans antialiased">
+<body class="bg-slate-50 h-screen flex flex-col items-center justify-center font-sans antialiased text-slate-600">
 
     <div class="w-full max-w-sm px-6">
-        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center relative overflow-hidden">
 
-            {{-- Decoration Top Bar --}}
-            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+        {{-- CARD --}}
+        <div class="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 text-center">
+
+            {{-- HEADER: Logo Kecil --}}
+            <div class="flex flex-col items-center justify-center gap-3 mb-6">
+                <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo"
+                    class="w-10 h-10 object-contain grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition duration-500">
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase">Security Check</span>
             </div>
 
-            <div class="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600">
-                <i data-feather="lock" class="w-8 h-8"></i>
-            </div>
+            {{-- TITLE --}}
+            <h2 class="text-lg font-bold text-slate-900">Buka Brankas</h2>
+            <p class="text-sm text-slate-500 mt-1 mb-8">Masukkan PIN Master 6-digit Anda.</p>
 
-            <h2 class="text-xl font-bold text-slate-800 mb-2">Verifikasi Keamanan</h2>
-            <p class="text-slate-500 text-sm mb-8">Masukkan 6 digit PIN Master untuk membuka brankas.</p>
-
-            {{-- Gunakan route pin.check untuk verify, atau pin.store untuk setup (sesuaikan filenya) --}}
-            <form action="{{ route('pin.check') }}" method="POST" class="space-y-6">
+            {{-- FORM --}}
+            <form action="{{ route('pin.check') }}" method="POST">
                 @csrf
-                <div>
+                <div class="mb-6 relative">
                     <input type="password" name="pin" maxlength="6" autofocus required
-                        class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 text-center text-3xl tracking-[0.5em] text-slate-800 font-bold focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none placeholder:text-slate-300 placeholder:tracking-normal transition"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 text-center text-3xl tracking-[0.5em] text-slate-900 font-bold font-mono focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none placeholder:text-slate-300 placeholder:tracking-widest transition"
                         placeholder="••••••">
+
                     @error('pin')
-                        <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
+                        <div class="absolute -bottom-6 left-0 w-full flex justify-center">
+                            <p class="text-red-500 text-xs font-medium bg-red-50 px-2 py-0.5 rounded-full">
+                                {{ $message }}</p>
+                        </div>
                     @enderror
                 </div>
 
                 <button type="submit"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-600/20 active:scale-[0.98]">
-                    Buka Brankas
+                    class="w-full bg-slate-900 hover:bg-black text-white font-semibold py-3.5 rounded-xl transition shadow-lg shadow-slate-900/10 active:scale-[0.98]">
+                    Buka Akses
                 </button>
             </form>
 
-            <div class="mt-8 pt-6 border-t border-slate-100">
-                <p class="text-xs text-slate-400">Akun: <span
-                        class="text-slate-600 font-semibold">{{ Auth::user()->email }}</span></p>
-                <form action="{{ route('logout') }}" method="POST" class="mt-2">
-                    @csrf
-                    <button class="text-xs text-red-500 hover:text-red-700 font-medium hover:underline">Ganti Akun /
-                        Logout</button>
-                </form>
-            </div>
         </div>
+
+        {{-- FOOTER INFO --}}
+        <div class="text-center mt-8">
+            <p class="text-xs text-slate-400 mb-2">Masuk sebagai <span
+                    class="text-slate-600 font-semibold">{{ Auth::user()->email }}</span></p>
+
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button class="text-xs text-red-500 hover:text-red-600 font-medium hover:underline transition">
+                    Logout / Ganti Akun
+                </button>
+            </form>
+        </div>
+
     </div>
-    <script>
-        feather.replace()
-    </script>
 </body>
 
 </html>
