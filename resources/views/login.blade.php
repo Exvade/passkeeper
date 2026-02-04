@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk - PassKeeper</title>
     @vite('resources/css/app.css')
+
+    {{-- Load Font (Biar konsisten sama Dashboard) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
 
 <body class="bg-slate-50 h-screen flex items-center justify-center font-sans antialiased">
@@ -13,12 +19,14 @@
     <div class="w-full max-w-md px-6">
         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center">
 
-            <div
-                class="bg-indigo-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
+            {{-- [UPDATE] Logo Image --}}
+            {{-- Pastikan file square-logo.png sudah ada di folder PUBLIC --}}
+            <div class="mx-auto mb-6 w-24 h-24 relative group">
+                <div
+                    class="absolute inset-0 bg-indigo-200 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition duration-500">
+                </div>
+                <img src="{{ asset('square-logo.png') }}" alt="PassKeeper Logo"
+                    class="relative w-full h-full object-cover rounded-2xl shadow-lg shadow-indigo-500/20 transform group-hover:scale-105 transition duration-500">
             </div>
 
             <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Selamat Datang Kembali</h1>
