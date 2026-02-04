@@ -1,4 +1,5 @@
 @if ($passwords->isEmpty())
+    {{-- Empty State --}}
     <div class="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm col-span-full">
         <div class="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
             <i data-feather="inbox" class="w-8 h-8"></i>
@@ -11,14 +12,15 @@
         @endif
     </div>
 @else
+    {{-- Grid Layout --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach ($passwords as $pass)
             <div
-                class="bg-white hover:shadow-lg hover:-translate-y-1 p-6 rounded-2xl border transition-all duration-300 group relative flex flex-col justify-between {{ $pass->is_favorite ? 'border-amber-200 shadow-amber-100 ring-1 ring-amber-100' : 'border-slate-200 shadow-sm hover:border-indigo-200' }}">
+                class="bg-white hover:shadow-lg hover:-translate-y-1 p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-200 transition-all duration-300 group relative flex flex-col justify-between {{ $pass->is_favorite ? '!border-amber-200 !shadow-amber-100 ring-1 ring-amber-100' : '' }}">
 
                 {{-- Header Card --}}
                 <div class="flex justify-between items-start mb-5">
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 overflow-hidden">
                         {{-- Favicon / Icon --}}
                         @if ($pass->site_url)
                             <div
@@ -33,7 +35,7 @@
                             </div>
                         @endif
 
-                        <div class="overflow-hidden">
+                        <div class="min-w-0">
                             <h3 class="font-bold text-slate-800 text-lg leading-tight truncate"
                                 title="{{ $pass->site_name }}">{{ $pass->site_name }}</h3>
                             <span
@@ -71,39 +73,35 @@
                         </button>
                     </div>
 
-                    {{-- Password Row (Updated: Eye replaced with Copy) --}}
+                    {{-- Password Row (Reveal then Copy Logic) --}}
                     <div
                         class="bg-slate-50 rounded-xl p-2.5 flex justify-between items-center border border-slate-200 group-hover:border-slate-300 transition relative">
-                        {{-- Hidden Input for Copy Logic --}}
-                        <input type="text" id="pass-val-{{ $pass->id }}"
-                            value="{{ Crypt::decryptString($pass->password) }}" class="hidden">
 
-                        {{-- Visual Dots --}}
-                        <div class="text-slate-500 font-mono text-lg tracking-widest pl-2 select-none">••••••••</div>
+                        {{-- Input Password (Awalnya Hidden & Dummy Value) --}}
+                        <input type="password" id="pass-input-{{ $pass->id }}" value="DUMMYPASS123" readonly
+                            class="bg-transparent border-none text-slate-600 w-full focus:ring-0 text-sm font-mono tracking-widest px-2 cursor-default selection:bg-indigo-100 selection:text-indigo-700">
 
-                        {{-- Copy Button (Primary Action) --}}
-                        <button onclick="copyToClipboard('pass-val-{{ $pass->id }}')"
-                            class="p-2 text-indigo-500 hover:text-white hover:bg-indigo-600 transition bg-indigo-50 rounded-lg shadow-sm border border-indigo-100 active:scale-95 flex items-center gap-2"
-                            title="Salin Password">
-                            <span class="text-[10px] font-bold hidden sm:inline-block">SALIN</span>
-                            <i data-feather="copy" class="w-4 h-4"></i>
+                        {{-- Action Button (Mata -> Copy) --}}
+                        <button onclick="handlePasswordAction({{ $pass->id }}, this)" data-state="hidden"
+                            class="p-2 text-slate-400 hover:text-indigo-600 transition hover:bg-white rounded-lg shadow-sm active:scale-95 flex items-center justify-center border border-transparent hover:border-slate-100 shrink-0"
+                            title="Lihat Password">
+                            {{-- Default Icon: Eye --}}
+                            <i data-feather="eye" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </div>
 
-                {{-- Footer Actions (Salin button removed) --}}
+                {{-- Footer Actions --}}
                 <div class="flex justify-between items-center pt-4 border-t border-slate-100 mt-auto">
-                    {{-- Visit Link --}}
                     @if ($pass->site_url)
                         <a href="{{ $pass->site_url }}" target="_blank"
                             class="text-xs font-semibold text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition py-1 px-2 rounded hover:bg-indigo-50">
                             <i data-feather="external-link" class="w-3.5 h-3.5"></i> Buka Website
                         </a>
                     @else
-                        <div></div> {{-- Spacer if no link --}}
+                        <div></div>
                     @endif
 
-                    {{-- Delete --}}
                     <button onclick="openDeleteModal('{{ route('passwords.destroy', $pass->id) }}')"
                         class="text-xs font-semibold text-slate-400 hover:text-red-600 transition flex items-center gap-1.5 py-1 px-2 rounded hover:bg-red-50">
                         <i data-feather="trash-2" class="w-3.5 h-3.5"></i> Hapus

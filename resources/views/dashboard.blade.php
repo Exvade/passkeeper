@@ -19,7 +19,6 @@
             color: #cbd5e1;
         }
 
-        /* Slate-300 */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -39,33 +38,26 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-3">
-                    {{-- LOGO IMAGE --}}
-                    <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo"
-                        class="w-9 h-9 object-contain rounded-lg">
+                    {{-- LOGO FIX: Added inline style to prevent giant logo --}}
+                    <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="object-contain rounded-lg"
+                        style="width: 36px; height: 36px;">
 
-                    {{-- BRAND NAME --}}
                     <span class="font-bold text-xl tracking-tight text-slate-800">PassKeeper</span>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3">
-                    {{-- Nama User (Hidden di HP) --}}
                     <span class="text-sm font-medium text-slate-500 hidden md:block">
                         Hai, {{ Auth::user()->name }}
                     </span>
-
-                    {{-- Divider --}}
                     <div class="h-6 w-px bg-slate-200 hidden md:block"></div>
 
-                    {{-- Tombol Settings (Ada Teksnya Sekarang) --}}
                     <button onclick="openSettingsModal()"
                         class="flex items-center gap-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition group"
                         title="Pengaturan Akun">
-                        {{-- Icon berputar dikit pas di-hover biar interaktif --}}
                         <i data-feather="settings"
                             class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"></i>
                         <span class="text-sm font-semibold hidden sm:block">Settings</span>
                     </button>
 
-                    {{-- Tombol Logout (Ada Teksnya Juga Biar Seragam) --}}
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit"
@@ -82,7 +74,6 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
         {{-- Header & Search --}}
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-5">
             <div>
@@ -104,15 +95,12 @@
                 </form>
 
                 <div class="flex gap-2">
-                    {{-- Tombol Export (Updated UX) --}}
                     <a href="{{ route('passwords.export') }}" target="_blank"
-                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
-                        title="Download Backup">
+                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap">
                         <i data-feather="download" class="w-4 h-4 text-slate-500"></i>
                         <span>Export CSV</span>
                     </a>
 
-                    {{-- Tombol Tambah --}}
                     <button onclick="openAddModal()"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 whitespace-nowrap">
                         <i data-feather="plus" class="w-5 h-5"></i>
@@ -162,7 +150,7 @@
                         <label
                             class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Kategori</label>
                         <select id="inputCategory" name="category"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition appearance-none font-medium">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition font-medium">
                             <option value="Sosmed">Sosmed</option>
                             <option value="Pekerjaan">Pekerjaan</option>
                             <option value="Keuangan">Keuangan</option>
@@ -214,71 +202,53 @@
         </div>
     </div>
 
-    {{-- MODAL SETTINGS --}}
+    {{-- SETTINGS MODAL --}}
     <div id="settingsModalOverlay" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
         <div class="flex items-center justify-center min-h-screen px-4">
             <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl relative">
-
-                {{-- Header --}}
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-slate-800">Akun Terhubung</h2>
-                    <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 transition">
-                        <i data-feather="x" class="w-6 h-6"></i>
-                    </button>
+                    <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 transition"><i
+                            data-feather="x" class="w-6 h-6"></i></button>
                 </div>
-
-                {{-- List Akun --}}
                 <div class="space-y-3 mb-6">
                     @foreach (Auth::user()->socialAccounts as $acc)
                         <div
                             class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
-
-                            {{-- Email Text Only (Tanpa Logo) --}}
                             <div class="flex flex-col">
                                 <p class="text-sm text-slate-800 font-semibold">{{ $acc->email }}</p>
                                 <p class="text-xs text-slate-500">{{ $acc->created_at->diffForHumans() }}</p>
                             </div>
-
-                            {{-- Action Button / Badge --}}
                             @if (Auth::user()->socialAccounts->count() > 1)
                                 <button
                                     onclick="openUnlinkModal('{{ route('social-accounts.destroy', $acc->id) }}', '{{ $acc->email }}')"
                                     class="text-slate-400 hover:text-red-600 p-2 transition bg-white border border-slate-200 rounded-lg hover:border-red-200 hover:bg-red-50"
-                                    title="Putuskan">
-                                    <i data-feather="trash-2" class="w-4 h-4"></i>
-                                </button>
+                                    title="Putuskan"><i data-feather="trash-2" class="w-4 h-4"></i></button>
                             @else
                                 <span
-                                    class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 uppercase tracking-wide">
-                                    Utama
-                                </span>
+                                    class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 uppercase tracking-wide">Utama</span>
                             @endif
                         </div>
                     @endforeach
                 </div>
-
-                {{-- Button Tambah --}}
                 <a href="{{ route('auth.google') }}"
-                    class="flex items-center justify-center gap-2 w-full bg-white text-slate-700 border border-slate-300 font-semibold py-3 rounded-xl transition hover:bg-slate-50 active:scale-[0.98]">
-                    <i data-feather="plus-circle" class="w-4 h-4"></i>
-                    Hubungkan Google Lain
-                </a>
+                    class="flex items-center justify-center gap-2 w-full bg-white text-slate-700 border border-slate-300 font-semibold py-3 rounded-xl transition hover:bg-slate-50 active:scale-[0.98]"><i
+                        data-feather="plus-circle" class="w-4 h-4"></i> Hubungkan Google Lain</a>
             </div>
         </div>
     </div>
 
-    {{-- MODAL DELETE --}}
+    {{-- DELETE MODAL --}}
     <div id="deleteModalOverlay" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
         <div class="flex items-center justify-center min-h-screen px-4">
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="alert-triangle" class="h-6 w-6"></i>
-                </div>
+                    <i data-feather="alert-triangle" class="h-6 w-6"></i></div>
                 <h3 class="text-lg font-bold text-slate-800">Hapus Permanen?</h3>
-                <p class="text-sm text-slate-500 mt-2 px-4">Tindakan ini tidak bisa dibatalkan. Data akan hilang.</p>
+                <p class="text-sm text-slate-500 mt-2 px-4">Tindakan ini tidak bisa dibatalkan.</p>
                 <form id="deleteForm" method="POST" class="mt-6 flex gap-3">
                     @csrf @method('DELETE')
                     <button type="button" onclick="closeDeleteModal()"
@@ -290,18 +260,17 @@
         </div>
     </div>
 
-    {{-- MODAL UNLINK --}}
+    {{-- UNLINK MODAL --}}
     <div id="unlinkModalOverlay" class="fixed inset-0 z-[60] hidden">
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeUnlinkModal()"></div>
         <div class="flex items-center justify-center min-h-screen px-4">
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="shield-off" class="h-6 w-6"></i>
-                </div>
+                    <i data-feather="shield-off" class="h-6 w-6"></i></div>
                 <h3 class="text-lg font-bold text-slate-800">Putuskan Akun?</h3>
-                <p class="text-sm text-slate-500 mt-2">Akses login untuk <br><span id="unlinkEmail"
-                        class="text-slate-800 font-bold bg-slate-100 px-1 rounded">email</span> akan dihapus.</p>
+                <p class="text-sm text-slate-500 mt-2">Akses login untuk <span id="unlinkEmail"
+                        class="text-slate-800 font-bold">email</span> akan dihapus.</p>
                 <form id="unlinkForm" method="POST" class="mt-6">
                     @csrf @method('DELETE')
                     <div class="mb-4 text-left">
@@ -321,17 +290,14 @@
         </div>
     </div>
 
-    {{-- TOAST DYNAMIC (Success/Error) --}}
+    {{-- TOAST --}}
     <div id="toast"
         class="fixed bottom-6 right-6 z-50 transform transition-all duration-300 translate-y-24 opacity-0">
         <div
             class="bg-white border border-slate-100 text-slate-800 px-5 py-4 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] flex items-center gap-4">
-            {{-- Icon Container --}}
-            <div id="toast-icon-bg" class="bg-emerald-100 p-2 rounded-full text-emerald-600">
-                <i id="toast-icon" data-feather="check" class="w-4 h-4"></i>
-            </div>
+            <div id="toast-icon-bg" class="bg-emerald-100 p-2 rounded-full text-emerald-600"><i id="toast-icon"
+                    data-feather="check" class="w-4 h-4"></i></div>
             <div>
-                {{-- Title & Message Dinamis --}}
                 <h4 id="toast-title" class="font-bold text-sm text-slate-900">Berhasil</h4>
                 <p id="toast-message" class="text-xs text-slate-500 mt-0.5">Notifikasi.</p>
             </div>
@@ -350,14 +316,13 @@
             const icon = document.getElementById('toast-icon');
 
             msg.innerText = message;
-
             if (type === 'error') {
                 title.innerText = "Gagal";
                 title.classList.add('text-red-600');
                 iconBg.classList.remove('bg-emerald-100', 'text-emerald-600');
                 iconBg.classList.add('bg-red-100', 'text-red-600');
                 icon.innerHTML =
-                    '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
                 icon.setAttribute('data-feather', 'alert-circle');
             } else {
                 title.innerText = "Berhasil";
@@ -373,26 +338,55 @@
             }, 3000);
         }
 
-        // --- DECRYPT PASSWORD ---
-        async function revealPassword(id) {
-            const inputField = document.getElementById(`pass-${id}`);
-            if (inputField.type === 'text' && inputField.value !== '••••••••••••') {
-                inputField.value = '••••••••••••';
-                return;
+        // --- NEW: REVEAL THEN COPY LOGIC ---
+        async function handlePasswordAction(id, btn) {
+            const input = document.getElementById(`pass-input-${id}`);
+            const currentState = btn.getAttribute('data-state');
+
+            // STATE 1: BUKA PASSWORD
+            if (currentState === 'hidden') {
+                try {
+                    btn.classList.add('animate-pulse'); // Feedback Loading
+
+                    const res = await fetch(`/passwords/${id}/decrypt`);
+                    if (!res.ok) throw new Error("Gagal mengambil data");
+                    const data = await res.json();
+
+                    // Tampilkan Password
+                    input.value = data.raw_password;
+                    input.type = 'text';
+                    input.classList.remove('text-slate-600', 'tracking-widest');
+                    input.classList.add('text-slate-800', 'font-bold', 'tracking-normal');
+
+                    // Ubah Tombol jadi Copy
+                    btn.setAttribute('data-state', 'visible');
+                    btn.title = "Salin Password";
+                    btn.classList.remove('text-slate-400', 'hover:text-indigo-600');
+                    btn.classList.add('text-indigo-600', 'bg-indigo-50', 'border-indigo-100');
+                    btn.innerHTML =
+                        `<i data-feather="copy" class="w-4 h-4"></i> <span class="text-[10px] font-bold ml-1 uppercase">Salin</span>`;
+                    feather.replace();
+                    btn.classList.remove('animate-pulse');
+
+                } catch (e) {
+                    console.error(e);
+                    showToast('Gagal membuka password.', 'error');
+                    btn.classList.remove('animate-pulse');
+                }
             }
-            try {
-                inputField.value = 'Loading...';
-                const res = await fetch(`/passwords/${id}/decrypt`);
-                if (!res.ok) throw new Error("Gagal mengambil data");
-                const data = await res.json();
-                inputField.value = data.raw_password;
-                setTimeout(() => {
-                    inputField.value = '••••••••••••';
-                }, 10000);
-            } catch (e) {
-                inputField.value = '••••••••••••';
-                showToast('Gagal decrypt! Coba refresh halaman.', 'error');
+            // STATE 2: COPY PASSWORD
+            else {
+                input.select();
+                input.setSelectionRange(0, 99999);
+                navigator.clipboard.writeText(input.value).then(() => {
+                    showToast('Password berhasil disalin!', 'success');
+                });
             }
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            showToast('Username disalin!', 'success');
         }
 
         // --- FAVORITE LOGIC ---
@@ -433,7 +427,7 @@
             }
         }
 
-        // --- REALTIME SEARCH (DEBOUNCE) ---
+        // --- SEARCH, MODALS ---
         let debounceTimer;
 
         function debouncedSearch() {
@@ -458,39 +452,12 @@
                 container.innerHTML = html;
                 feather.replace();
             } catch (error) {
-                console.error('Gagal mencari:', error);
+                console.error(error);
             } finally {
                 container.style.opacity = '1';
             }
         }
 
-        // --- COPY UTILS ---
-        function copyText(text) {
-            navigator.clipboard.writeText(text);
-            showToast('Username berhasil disalin!', 'success');
-        }
-
-        function copyToClipboard(id) {
-            const el = document.getElementById(id);
-
-            // Cek apakah elemen ada
-            if (!el) {
-                showToast('Terjadi kesalahan, data tidak ditemukan.', 'error');
-                return;
-            }
-
-            // Langsung copy value (karena di Blade baru, value-nya sudah password asli)
-            navigator.clipboard.writeText(el.value)
-                .then(() => {
-                    showToast('Password disalin ke clipboard!', 'success');
-                })
-                .catch(err => {
-                    console.error('Gagal menyalin: ', err);
-                    showToast('Gagal menyalin password.', 'error');
-                });
-        }
-
-        // --- MODAL CONTROLS ---
         const modal = document.getElementById('modalOverlay');
         const form = document.getElementById('modalForm');
         const title = document.getElementById('modalTitle');
