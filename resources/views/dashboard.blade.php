@@ -38,10 +38,12 @@
         class="bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 supports-[backdrop-filter]:bg-white/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-2.5">
-                    <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-indigo-200 shadow-lg">
-                        <i data-feather="shield" class="w-5 h-5"></i>
-                    </div>
+                <div class="flex items-center gap-3">
+                    {{-- LOGO IMAGE --}}
+                    <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo"
+                        class="w-9 h-9 object-contain rounded-lg">
+
+                    {{-- BRAND NAME --}}
                     <span class="font-bold text-xl tracking-tight text-slate-800">PassKeeper</span>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3">
@@ -217,25 +219,28 @@
         <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
         <div class="flex items-center justify-center min-h-screen px-4">
             <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl relative">
+
+                {{-- Header --}}
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-slate-800">Akun Terhubung</h2>
-                    <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600"><i
-                            data-feather="x" class="w-6 h-6"></i></button>
+                    <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 transition">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
                 </div>
+
+                {{-- List Akun --}}
                 <div class="space-y-3 mb-6">
                     @foreach (Auth::user()->socialAccounts as $acc)
                         <div
                             class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-white shadow-sm p-1.5 rounded-full border border-slate-100">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-                                        alt="G" class="w-5 h-5">
-                                </div>
-                                <div>
-                                    <p class="text-sm text-slate-800 font-semibold">{{ $acc->email }}</p>
-                                    <p class="text-xs text-slate-500">{{ $acc->created_at->diffForHumans() }}</p>
-                                </div>
+
+                            {{-- Email Text Only (Tanpa Logo) --}}
+                            <div class="flex flex-col">
+                                <p class="text-sm text-slate-800 font-semibold">{{ $acc->email }}</p>
+                                <p class="text-xs text-slate-500">{{ $acc->created_at->diffForHumans() }}</p>
                             </div>
+
+                            {{-- Action Button / Badge --}}
                             @if (Auth::user()->socialAccounts->count() > 1)
                                 <button
                                     onclick="openUnlinkModal('{{ route('social-accounts.destroy', $acc->id) }}', '{{ $acc->email }}')"
@@ -245,14 +250,19 @@
                                 </button>
                             @else
                                 <span
-                                    class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">UTAMA</span>
+                                    class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 uppercase tracking-wide">
+                                    Utama
+                                </span>
                             @endif
                         </div>
                     @endforeach
                 </div>
+
+                {{-- Button Tambah --}}
                 <a href="{{ route('auth.google') }}"
-                    class="flex items-center justify-center gap-2 w-full bg-white text-slate-700 border border-slate-300 font-semibold py-3 rounded-xl transition hover:bg-slate-50">
-                    <i data-feather="plus-circle" class="w-4 h-4"></i> Hubungkan Google Lain
+                    class="flex items-center justify-center gap-2 w-full bg-white text-slate-700 border border-slate-300 font-semibold py-3 rounded-xl transition hover:bg-slate-50 active:scale-[0.98]">
+                    <i data-feather="plus-circle" class="w-4 h-4"></i>
+                    Hubungkan Google Lain
                 </a>
             </div>
         </div>
@@ -462,13 +472,22 @@
 
         function copyToClipboard(id) {
             const el = document.getElementById(id);
-            if (el.value === '••••••••••••' || el.value === 'Loading...') {
-                showToast('Buka password dulu baru copy!', 'error');
+
+            // Cek apakah elemen ada
+            if (!el) {
+                showToast('Terjadi kesalahan, data tidak ditemukan.', 'error');
                 return;
             }
-            el.select();
-            navigator.clipboard.writeText(el.value);
-            showToast('Password disalin ke clipboard!', 'success');
+
+            // Langsung copy value (karena di Blade baru, value-nya sudah password asli)
+            navigator.clipboard.writeText(el.value)
+                .then(() => {
+                    showToast('Password disalin ke clipboard!', 'success');
+                })
+                .catch(err => {
+                    console.error('Gagal menyalin: ', err);
+                    showToast('Gagal menyalin password.', 'error');
+                });
         }
 
         // --- MODAL CONTROLS ---
