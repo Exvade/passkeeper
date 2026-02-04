@@ -19,21 +19,21 @@
         <div
             class="bg-white p-8 rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-100 text-center">
 
-            {{-- HEADER: LOGO + BRAND NAME (Horizontal) --}}
-            <div class="flex items-center justify-center gap-3 mb-8">
-                {{-- Logo Kecil (Icon) --}}
-                <div class="w-10 h-10 relative">
+            {{-- HEADER: LOGO (Atas) + BRAND NAME (Bawah) --}}
+            <div class="flex flex-col items-center justify-center gap-4 mb-8">
+                {{-- Logo --}}
+                <div class="w-16 h-16 relative">
                     <img src="{{ asset('square-logo.png') }}" alt="Logo"
-                        class="w-full h-full object-cover rounded-xl shadow-sm border border-slate-100">
+                        class="w-full h-full object-cover rounded-2xl shadow-md border border-slate-100">
                 </div>
                 {{-- Nama Brand --}}
                 <span class="font-bold text-2xl text-slate-800 tracking-tight font-sans">PassKeeper</span>
             </div>
 
-            {{-- COPYWRITING BARU --}}
+            {{-- COPYWRITING --}}
             <h1 class="text-lg font-semibold text-slate-900">Akses Brankas Anda</h1>
-            <p class="text-slate-500 mt-2 text-sm mb-8 leading-relaxed">
-                Simpan dan kelola semua kata sandi Anda dalam satu tempat yang aman dan terenkripsi.
+            <p class="text-slate-500 mt-2 text-sm mb-8 leading-relaxed px-2">
+                Simpan dan kelola semua kata sandi Anda dalam satu tempat yang aman.
             </p>
 
             {{-- BUTTON GOOGLE --}}
