@@ -23,7 +23,7 @@
             <div class="flex flex-col items-center justify-center gap-4 mb-8">
                 {{-- Logo --}}
                 <div class="w-16 h-16 relative">
-                    <img src="{{ asset('square-logo.png') }}" alt="Logo"
+                    <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo"
                         class="w-full h-full object-cover rounded-2xl shadow-md border border-slate-100">
                 </div>
                 {{-- Nama Brand --}}
