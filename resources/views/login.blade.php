@@ -7,7 +7,6 @@
     <title>Masuk - PassKeeper</title>
     @vite('resources/css/app.css')
 
-    {{-- Load Font (Biar konsisten sama Dashboard) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -19,12 +18,13 @@
     <div class="w-full max-w-md px-6">
         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center">
 
-            {{-- [UPDATE] Logo Image --}}
-            {{-- Pastikan file square-logo.png sudah ada di folder PUBLIC --}}
-            <div class="mx-auto mb-6 w-24 h-24 relative group">
+            {{-- LOGO SECTION (Sudah Dikecilkan) --}}
+            {{-- Mengubah w-24 h-24 menjadi w-16 h-16 --}}
+            <div class="mx-auto mb-6 w-16 h-16 relative group">
                 <div
                     class="absolute inset-0 bg-indigo-200 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition duration-500">
                 </div>
+
                 <img src="{{ asset('square-logo.png') }}" alt="PassKeeper Logo"
                     class="relative w-full h-full object-cover rounded-2xl shadow-lg shadow-indigo-500/20 transform group-hover:scale-105 transition duration-500">
             </div>
@@ -35,7 +35,6 @@
 
             <a href="{{ route('auth.google') }}"
                 class="flex items-center justify-center gap-3 w-full bg-white text-slate-700 font-semibold py-3.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95 group">
-                {{-- Icon Google --}}
                 <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                     <path fill="#4285F4"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
