@@ -5,6 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    {{-- 3. META TAGS UNTUK WHATSAPP/SOSMED --}}
+    <meta property="og:title" content="PassKeeper - Brankas Password Aman">
+    <meta property="og:description" content="Kelola dan amankan akses digital Anda dalam satu tempat terenkripsi.">
+    <meta property="og:image" content="{{ asset('passkeeper-logo.png') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+
     <title>Dashboard - PassKeeper</title>
     @vite('resources/css/app.css')
     <script src="https://unpkg.com/feather-icons"></script>
@@ -37,11 +45,9 @@
         class="bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 supports-[backdrop-filter]:bg-white/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-1">
-                    {{-- LOGO FIX: Added inline style to prevent giant logo --}}
+                <div class="flex items-center gap-3">
                     <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="object-contain rounded-lg"
                         style="width: 36px; height: 36px;">
-
                     <span class="font-bold text-xl tracking-tight text-slate-800">PassKeeper</span>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3">
@@ -58,16 +64,16 @@
                         <span class="text-sm font-semibold hidden sm:block">Settings</span>
                     </button>
 
-                    <form action="{{ route('logout') }}" method="POST">
+                    {{-- 2. LOGOUT BUTTON (Sekarang memicu Modal, bukan langsung submit) --}}
+                    <form id="realLogoutForm" action="{{ route('logout') }}" method="POST" class="hidden">
                         @csrf
-                        <button type="submit"
-                            class="flex items-center gap-2 text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition group"
-                            title="Keluar Aplikasi">
-                            <i data-feather="log-out"
-                                class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
-                            <span class="text-sm font-semibold hidden sm:block">Logout</span>
-                        </button>
                     </form>
+                    <button onclick="openLogoutModal()"
+                        class="flex items-center gap-2 text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition group"
+                        title="Keluar Aplikasi">
+                        <i data-feather="log-out" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+                        <span class="text-sm font-semibold hidden sm:block">Logout</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -246,8 +252,7 @@
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="alert-triangle" class="h-6 w-6"></i>
-                </div>
+                    <i data-feather="alert-triangle" class="h-6 w-6"></i></div>
                 <h3 class="text-lg font-bold text-slate-800">Hapus Permanen?</h3>
                 <p class="text-sm text-slate-500 mt-2 px-4">Tindakan ini tidak bisa dibatalkan.</p>
                 <form id="deleteForm" method="POST" class="mt-6 flex gap-3">
@@ -268,8 +273,7 @@
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="shield-off" class="h-6 w-6"></i>
-                </div>
+                    <i data-feather="shield-off" class="h-6 w-6"></i></div>
                 <h3 class="text-lg font-bold text-slate-800">Putuskan Akun?</h3>
                 <p class="text-sm text-slate-500 mt-2">Akses login untuk <span id="unlinkEmail"
                         class="text-slate-800 font-bold">email</span> akan dihapus.</p>
@@ -288,6 +292,32 @@
                             class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-red-500/30">Putuskan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- 2. LOGOUT CONFIRMATION MODAL (BARU) --}}
+    <div id="logoutModalOverlay" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
+                <div
+                    class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-slate-50 border-4 border-slate-100 mb-4 text-slate-600">
+                    <i data-feather="log-out" class="h-6 w-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Keluar Aplikasi?</h3>
+                <p class="text-sm text-slate-500 mt-2 px-4">Anda harus memasukkan PIN lagi untuk masuk kembali.</p>
+
+                <div class="mt-6 flex gap-3">
+                    <button type="button" onclick="closeLogoutModal()"
+                        class="w-full bg-white border border-slate-300 text-slate-700 font-semibold py-2.5 rounded-xl hover:bg-slate-50 transition">Batal</button>
+
+                    {{-- Trigger form logout asli via JS --}}
+                    <button onclick="document.getElementById('realLogoutForm').submit()"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-red-500/30 transition">
+                        Ya, Keluar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -334,7 +364,7 @@
                 iconBg.classList.remove('bg-emerald-100', 'text-emerald-600');
                 iconBg.classList.add('bg-red-100', 'text-red-600');
                 icon.innerHTML =
-                    '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
                 icon.setAttribute('data-feather', 'alert-circle');
             } else {
                 title.innerText = "Berhasil";
@@ -350,27 +380,21 @@
             }, 3000);
         }
 
-        // --- NEW: REVEAL THEN COPY LOGIC WITH AUTO-HIDE ---
+        // --- PASSWORD REVEAL & COPY ---
         async function handlePasswordAction(id, btn) {
             const input = document.getElementById(`pass-input-${id}`);
             const currentState = btn.getAttribute('data-state');
 
-            // STATE 1: BUKA PASSWORD
             if (currentState === 'hidden') {
                 try {
                     btn.classList.add('animate-pulse');
-
                     const res = await fetch(`/passwords/${id}/decrypt`);
                     if (!res.ok) throw new Error("Gagal mengambil data");
                     const data = await res.json();
-
-                    // Tampilkan Password
                     input.value = data.raw_password;
                     input.type = 'text';
                     input.classList.remove('text-slate-600', 'tracking-widest');
                     input.classList.add('text-slate-800', 'font-bold', 'tracking-normal');
-
-                    // Ubah Tombol jadi Copy
                     btn.setAttribute('data-state', 'visible');
                     btn.title = "Salin Password";
                     btn.classList.remove('text-slate-400', 'hover:text-indigo-600');
@@ -379,29 +403,21 @@
                         `<i data-feather="copy" class="w-4 h-4"></i> <span class="text-[10px] font-bold ml-1 uppercase">Salin</span>`;
                     feather.replace();
                     btn.classList.remove('animate-pulse');
-
                 } catch (e) {
                     console.error(e);
                     showToast('Gagal membuka password.', 'error');
                     btn.classList.remove('animate-pulse');
                 }
-            }
-            // STATE 2: COPY PASSWORD & AUTO HIDE
-            else {
+            } else {
                 input.select();
                 input.setSelectionRange(0, 99999);
                 navigator.clipboard.writeText(input.value).then(() => {
                     showToast('Password berhasil disalin!', 'success');
-
-                    // --- AUTO HIDE LOGIC (2 Detik) ---
                     setTimeout(() => {
-                        // 1. Sembunyikan Password
                         input.type = 'password';
-                        input.value = 'DUMMYPASS123'; // Reset value dummy
+                        input.value = 'DUMMYPASS123';
                         input.classList.remove('text-slate-800', 'font-bold', 'tracking-normal');
                         input.classList.add('text-slate-600', 'tracking-widest');
-
-                        // 2. Kembalikan Tombol ke Mata
                         btn.setAttribute('data-state', 'hidden');
                         btn.title = "Lihat Password";
                         btn.classList.remove('text-indigo-600', 'bg-indigo-50', 'border-indigo-100');
@@ -409,7 +425,6 @@
                         btn.innerHTML = `<i data-feather="eye" class="w-4 h-4"></i>`;
                         feather.replace();
                     }, 2000);
-
                 });
             }
         }
@@ -419,11 +434,9 @@
             showToast('Username disalin!', 'success');
         }
 
-        // --- FAVORITE LOGIC ---
         async function toggleFavorite(id, btnElement) {
             const icon = btnElement.querySelector('svg') || btnElement.querySelector('i');
             const isActive = icon.classList.contains('star-active');
-
             if (isActive) {
                 icon.classList.remove('star-active');
                 icon.classList.add('star-inactive');
@@ -431,7 +444,6 @@
                 icon.classList.add('star-active');
                 icon.classList.remove('star-inactive');
             }
-
             try {
                 const response = await fetch(`/passwords/${id}/favorite`, {
                     method: 'PATCH',
@@ -457,7 +469,6 @@
             }
         }
 
-        // --- SEARCH, MODALS ---
         let debounceTimer;
 
         function debouncedSearch() {
@@ -488,6 +499,7 @@
             }
         }
 
+        // --- MODAL VARIABLES ---
         const modal = document.getElementById('modalOverlay');
         const form = document.getElementById('modalForm');
         const title = document.getElementById('modalTitle');
@@ -500,9 +512,14 @@
         const unlinkEmailSpan = document.getElementById('unlinkEmail');
         const delModal = document.getElementById('deleteModalOverlay');
         const delForm = document.getElementById('deleteForm');
+        const logoutModal = document.getElementById('logoutModalOverlay');
+
+        // 1. SCROLL LOCK LOGIC (Ditambahkan di semua open/close)
+        // Saat modal buka, body dikasih class overflow-hidden biar gak bisa scroll belakangnya
 
         function openAddModal() {
             modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // LOCK SCROLL
             form.action = "{{ route('passwords.store') }}";
             title.innerText = "Simpan Password Baru";
             btn.innerText = "Simpan";
@@ -518,6 +535,7 @@
 
         function openEditModal(data) {
             modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // LOCK SCROLL
             form.action = `/passwords/${data.id}`;
             title.innerText = "Edit Password";
             btn.innerText = "Update";
@@ -533,19 +551,23 @@
 
         function closeModal() {
             modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden'); // UNLOCK SCROLL
         }
 
         function openSettingsModal() {
             settingsModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // LOCK SCROLL
         }
 
         function closeSettingsModal() {
             settingsModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden'); // UNLOCK SCROLL
         }
 
         function openUnlinkModal(url, email) {
             settingsModal.classList.add('hidden');
             unlinkModal.classList.remove('hidden');
+            // Gak perlu lock/unlock body karena transisi dari modal ke modal
             unlinkForm.action = url;
             unlinkEmailSpan.innerText = email;
         }
@@ -553,15 +575,29 @@
         function closeUnlinkModal() {
             unlinkModal.classList.add('hidden');
             settingsModal.classList.remove('hidden');
+            // Gak perlu unlock karena balik ke settings modal
         }
 
         function openDeleteModal(url) {
             delForm.action = url;
             delModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // LOCK SCROLL
         }
 
         function closeDeleteModal() {
             delModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden'); // UNLOCK SCROLL
+        }
+
+        // --- NEW: LOGOUT MODAL FUNCTIONS ---
+        function openLogoutModal() {
+            logoutModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // LOCK SCROLL
+        }
+
+        function closeLogoutModal() {
+            logoutModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden'); // UNLOCK SCROLL
         }
     </script>
 </body>
