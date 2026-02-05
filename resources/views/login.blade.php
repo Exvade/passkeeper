@@ -7,6 +7,13 @@
     <title>Masuk - PassKeeper</title>
     @vite('resources/css/app.css')
 
+    {{-- 3. META TAGS UNTUK WHATSAPP/SOSMED --}}
+    <meta property="og:title" content="PassKeeper - Brankas Password Aman">
+    <meta property="og:description" content="Kelola dan amankan akses digital Anda dalam satu tempat terenkripsi.">
+    <meta property="og:image" content="{{ asset('passkeeper-logo.png') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -22,7 +29,7 @@
 
             {{-- HEADER: Logo + Nama (Satu Kesatuan) --}}
             {{-- Hapus shadow, border, dan rounded pada gambar agar clean --}}
-            <div class="flex items-center justify-center gap-3 mb-8">
+            <div class="flex items-center justify-center gap-1 mb-8">
                 <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="w-10 h-10 object-contain">
                 <h1 class="font-bold text-2xl text-slate-900 tracking-tight">PassKeeper</h1>
             </div>

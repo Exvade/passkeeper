@@ -45,7 +45,7 @@
         class="bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 supports-[backdrop-filter]:bg-white/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1">
                     <img src="{{ asset('passkeeper-logo.png') }}" alt="Logo" class="object-contain rounded-lg"
                         style="width: 36px; height: 36px;">
                     <span class="font-bold text-xl tracking-tight text-slate-800">PassKeeper</span>
@@ -252,7 +252,8 @@
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="alert-triangle" class="h-6 w-6"></i></div>
+                    <i data-feather="alert-triangle" class="h-6 w-6"></i>
+                </div>
                 <h3 class="text-lg font-bold text-slate-800">Hapus Permanen?</h3>
                 <p class="text-sm text-slate-500 mt-2 px-4">Tindakan ini tidak bisa dibatalkan.</p>
                 <form id="deleteForm" method="POST" class="mt-6 flex gap-3">
@@ -273,7 +274,8 @@
             <div class="bg-white w-full max-w-sm p-6 rounded-3xl shadow-2xl text-center relative">
                 <div
                     class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 border-4 border-red-100 mb-4 text-red-500">
-                    <i data-feather="shield-off" class="h-6 w-6"></i></div>
+                    <i data-feather="shield-off" class="h-6 w-6"></i>
+                </div>
                 <h3 class="text-lg font-bold text-slate-800">Putuskan Akun?</h3>
                 <p class="text-sm text-slate-500 mt-2">Akses login untuk <span id="unlinkEmail"
                         class="text-slate-800 font-bold">email</span> akan dihapus.</p>
@@ -364,7 +366,7 @@
                 iconBg.classList.remove('bg-emerald-100', 'text-emerald-600');
                 iconBg.classList.add('bg-red-100', 'text-red-600');
                 icon.innerHTML =
-                '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                    '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
                 icon.setAttribute('data-feather', 'alert-circle');
             } else {
                 title.innerText = "Berhasil";
