@@ -309,6 +309,16 @@
     <script>
         feather.replace();
 
+        document.addEventListener("DOMContentLoaded", function() {
+            @if (session('success'))
+                showToast("{{ session('success') }}", 'success');
+            @endif
+
+            @if (session('error'))
+                showToast("{{ session('error') }}", 'error');
+            @endif
+        });
+
         // --- TOAST SYSTEM ---
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -324,7 +334,7 @@
                 iconBg.classList.remove('bg-emerald-100', 'text-emerald-600');
                 iconBg.classList.add('bg-red-100', 'text-red-600');
                 icon.innerHTML =
-                '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+                    '<polyline points="12 2 12 12"></polyline><line x1="12" y1="16" x2="12.01" y2="16"></line>';
                 icon.setAttribute('data-feather', 'alert-circle');
             } else {
                 title.innerText = "Berhasil";
