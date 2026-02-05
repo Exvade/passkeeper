@@ -131,7 +131,7 @@ class SocialAuthController extends Controller
         }
 
         // Jika sudah punya PIN, arahkan ke dashboard (atau verify pin)
-        return redirect()->route('dashboard');
+        return redirect()->route('pin.verify');
     }
 
     /**

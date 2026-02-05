@@ -1,40 +1,51 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SocialAuthController; // Pakai controller yang benar
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PinController;
-use App\Http\Controllers\SocialAccountController;
+use App\Http\Controllers\AuthController; // Jika logout masih pakai ini
 
-
-// Halaman Depan (Login)
+// 1. HALAMAN DEPAN (LOGIN)
 Route::get('/', function () {
-    return view('login');
+    return view('login'); // Pastikan file 'login.blade.php' ada
 })->name('login');
 
-// Route untuk melempar user ke Google
-Route::get('/auth/google/redirect', [AuthController::class, 'redirect'])->name('auth.google'); 
+// 2. AUTH GOOGLE (Login & Register)
+Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])->name('auth.google');
+Route::get('/auth/google/callback', [SocialAuthController::class, 'handleProviderCallback']);
 
-// Route callback (biarkan saja, pastikan ada)
-Route::get('/auth/google/callback', [AuthController::class, 'callback']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// 3. LOGOUT
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/');
+})->name('logout');
 
-// Dashboard (Protected)
+
+// --- AREA YANG BUTUH LOGIN ---
 Route::middleware('auth')->group(function () {
 
-    // 1. Route PIN (Tidak kena middleware PIN, supaya ga looping)
+    // A. ROUTE PIN (TIDAK BOLEH KENA MIDDLEWARE PIN)
+    // Supaya tidak looping (redirect berulang-ulang)
+    
+    // Verifikasi PIN (Lock Screen)
     Route::get('/locked', [PinController::class, 'showVerifyForm'])->name('pin.verify');
     Route::post('/locked', [PinController::class, 'verify'])->name('pin.check');
 
-    Route::get('/setup-pin', [PinController::class, 'showSetupForm'])->name('pin.create');
+    // Buat PIN Baru (Setup)
+    Route::get('/setup-pin', [PinController::class, 'showSetupForm'])->name('pin.setup'); // Konsisten pakai .setup
     Route::post('/setup-pin', [PinController::class, 'setup'])->name('pin.store');
 
-    // 2. Route Dashboard & Password (DILINDUNGI PIN)
-    Route::middleware(\App\Http\Middleware\EnsurePinIsVerified::class)->group(function () {
+
+    // B. ROUTE DASHBOARD (DILINDUNGI PIN)
+    // Hanya bisa diakses kalau sudah login DAN sudah masukkan PIN
+    Route::middleware('pin.verified')->group(function () {
 
         Route::get('/dashboard', [PasswordController::class, 'index'])->name('dashboard');
 
-        // ... Semua route password lainnya (store, delete, export, dll) masukkan ke sini ...
+        // CRUD Password
         Route::post('/passwords', [PasswordController::class, 'store'])->name('passwords.store');
         Route::put('/passwords/{id}', [PasswordController::class, 'update'])->name('passwords.update');
         Route::delete('/passwords/{id}', [PasswordController::class, 'destroy'])->name('passwords.destroy');
@@ -42,10 +53,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('/passwords/{id}/favorite', [PasswordController::class, 'toggleFavorite'])->name('passwords.favorite');
         Route::get('/export', [PasswordController::class, 'export'])->name('passwords.export');
 
-        Route::delete('/social-accounts/{id}', [SocialAccountController::class, 'destroy'])->name('social-accounts.destroy');
-
-        // Route Link Akun (Nanti kita buat)
-        // Route::post('/link-account', ...);
+        // Hapus Akun Google (Unlink)
+        Route::delete('/social-accounts/{id}', [SocialAuthController::class, 'destroy'])->name('social-accounts.destroy');
     });
 
 });
